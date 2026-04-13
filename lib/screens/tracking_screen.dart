@@ -15,8 +15,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
-  final _drinksController = TextEditingController();
-  final _noteController = TextEditingController();
+  final _drinkNameController = TextEditingController();
+  final _alcoholController = TextEditingController();
+  final _amountController = TextEditingController();
   bool _isSubmitting = false;
 
   @override
@@ -40,23 +41,28 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
   @override
   void dispose() {
-    _drinksController.dispose();
-    _noteController.dispose();
+    _drinkNameController.dispose();
+    _alcoholController.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
-  Future<bool> addTrackingEntry({required int drinks, String? note}) async {
+  Future<bool> addTrackingEntry({
+    required String drinkName,
+    required double alcoholPercent,
+    required int amount,
+  }) async {
     final user = _auth.currentUser;
     if (user == null) {
       _redirectIfUnauthenticated();
       return false;
     }
 
-    final cleanedNote = note?.trim();
     final data = <String, dynamic>{
-      'drinks': drinks,
+      'drinkName': drinkName,
+      'alcoholPercent': alcoholPercent,
+      'amount': amount,
       'createdAt': FieldValue.serverTimestamp(),
-      if (cleanedNote != null && cleanedNote.isNotEmpty) 'note': cleanedNote,
     };
 
     try {
@@ -70,7 +76,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       }
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Tracking entry saved.')));
+      ).showSnackBar(const SnackBar(content: Text('Drink entry saved.')));
       return true;
     } on FirebaseException catch (e) {
       if (!mounted) {
@@ -89,14 +95,20 @@ class _TrackingScreenState extends State<TrackingScreen> {
       return;
     }
 
-    final drinks = int.parse(_drinksController.text.trim());
+    final drinkName = _drinkNameController.text.trim();
+    final alcoholPercent = double.parse(
+      _alcoholController.text.trim().replaceAll(',', '.'),
+    );
+    final amount = int.parse(_amountController.text.trim());
+
     setState(() {
       _isSubmitting = true;
     });
 
     final saved = await addTrackingEntry(
-      drinks: drinks,
-      note: _noteController.text,
+      drinkName: drinkName,
+      alcoholPercent: alcoholPercent,
+      amount: amount,
     );
 
     if (!mounted) {
@@ -108,8 +120,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
     });
 
     if (saved) {
-      _drinksController.clear();
-      _noteController.clear();
+      _drinkNameController.clear();
+      _alcoholController.clear();
+      _amountController.clear();
     }
   }
 
@@ -185,11 +198,15 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
   Future<void> _editEntry(
     String docId,
-    int currentDrinks,
-    String? currentNote,
+    String currentDrinkName,
+    double currentAlcoholPercent,
+    int currentAmount,
   ) async {
-    final drinksCtrl = TextEditingController(text: currentDrinks.toString());
-    final noteCtrl = TextEditingController(text: currentNote ?? '');
+    final nameCtrl = TextEditingController(text: currentDrinkName);
+    final alcoholCtrl = TextEditingController(
+      text: currentAlcoholPercent.toString(),
+    );
+    final amountCtrl = TextEditingController(text: currentAmount.toString());
     final editFormKey = GlobalKey<FormState>();
 
     final confirmed = await showDialog<bool>(
@@ -202,32 +219,56 @@ class _TrackingScreenState extends State<TrackingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                controller: drinksCtrl,
-                keyboardType: TextInputType.number,
+                controller: nameCtrl,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  labelText: 'Number of drinks',
+                  labelText: 'Drink Name',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
-                  final text = value?.trim() ?? '';
-                  if (text.isEmpty) {
-                    return 'Please enter a number.';
-                  }
-                  final v = int.tryParse(text);
-                  if (v == null || v <= 0) {
-                    return 'Enter a whole number greater than 0.';
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a drink name.';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 12),
               TextFormField(
-                controller: noteCtrl,
-                maxLines: 3,
+                controller: alcoholCtrl,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: const InputDecoration(
-                  labelText: 'Note (optional)',
+                  labelText: 'Alcohol %',
                   border: OutlineInputBorder(),
                 ),
+                validator: (value) {
+                  final text = value?.trim().replaceAll(',', '.') ?? '';
+                  if (text.isEmpty) return 'Please enter alcohol percentage.';
+                  final v = double.tryParse(text);
+                  if (v == null || v < 0 || v > 100) {
+                    return 'Enter a value between 0 and 100.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: amountCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Amount (ml)',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  final text = value?.trim() ?? '';
+                  if (text.isEmpty) return 'Please enter an amount.';
+                  final v = int.tryParse(text);
+                  if (v == null || v <= 0) {
+                    return 'Enter a whole number greater than 0.';
+                  }
+                  return null;
+                },
               ),
             ],
           ),
@@ -250,29 +291,31 @@ class _TrackingScreenState extends State<TrackingScreen> {
     );
 
     if (confirmed != true || !mounted) {
-      drinksCtrl.dispose();
-      noteCtrl.dispose();
+      nameCtrl.dispose();
+      alcoholCtrl.dispose();
+      amountCtrl.dispose();
       return;
     }
 
     final user = _auth.currentUser;
     if (user == null) {
-      drinksCtrl.dispose();
-      noteCtrl.dispose();
+      nameCtrl.dispose();
+      alcoholCtrl.dispose();
+      amountCtrl.dispose();
       return;
     }
 
-    final cleanedNote = noteCtrl.text.trim();
     final updatedData = <String, dynamic>{
-      'drinks': int.parse(drinksCtrl.text.trim()),
-      if (cleanedNote.isNotEmpty)
-        'note': cleanedNote
-      else
-        'note': FieldValue.delete(),
+      'drinkName': nameCtrl.text.trim(),
+      'alcoholPercent': double.parse(
+        alcoholCtrl.text.trim().replaceAll(',', '.'),
+      ),
+      'amount': int.parse(amountCtrl.text.trim()),
     };
 
-    drinksCtrl.dispose();
-    noteCtrl.dispose();
+    nameCtrl.dispose();
+    alcoholCtrl.dispose();
+    amountCtrl.dispose();
 
     try {
       await _firestore
@@ -306,7 +349,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         leading: null,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await _auth.signOut();
               if (!context.mounted) {
@@ -338,38 +381,103 @@ class _TrackingScreenState extends State<TrackingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                TextFormField(
-                  controller: _drinksController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Number of drinks',
-                    border: OutlineInputBorder(),
+                // ── Add New Drink card ──────────────────────────────────
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  validator: (value) {
-                    final text = value?.trim() ?? '';
-                    if (text.isEmpty) {
-                      return 'Please enter a number.';
-                    }
-                    final drinks = int.tryParse(text);
-                    if (drinks == null || drinks <= 0) {
-                      return 'Enter a whole number greater than 0.';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _noteController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Note (optional)',
-                    border: OutlineInputBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Card title row
+                        const Row(
+                          children: [
+                            Icon(Icons.local_bar, size: 22),
+                            SizedBox(width: 8),
+                            Text(
+                              'Add New Drink',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Drink Name
+                        TextFormField(
+                          controller: _drinkNameController,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: const InputDecoration(
+                            labelText: 'Drink Name',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter a drink name.';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // Alcohol %
+                        TextFormField(
+                          controller: _alcoholController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Alcohol %',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            final text =
+                                value?.trim().replaceAll(',', '.') ?? '';
+                            if (text.isEmpty) {
+                              return 'Please enter alcohol percentage.';
+                            }
+                            final v = double.tryParse(text);
+                            if (v == null || v < 0 || v > 100) {
+                              return 'Enter a value between 0 and 100.';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        // Amount (ml)
+                        TextFormField(
+                          controller: _amountController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: 'Amount (ml)',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            final text = value?.trim() ?? '';
+                            if (text.isEmpty) return 'Please enter an amount.';
+                            final v = int.tryParse(text);
+                            if (v == null || v <= 0) {
+                              return 'Enter a whole number greater than 0.';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _isSubmitting
+                              ? null
+                              : _submitTrackingEntry,
+                          icon: const Icon(Icons.add),
+                          label: Text(
+                            _isSubmitting ? 'Saving...' : 'Add Drink',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submitTrackingEntry,
-                  child: Text(_isSubmitting ? 'Saving...' : 'Save entry'),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -401,22 +509,26 @@ class _TrackingScreenState extends State<TrackingScreen> {
 
                       return ListView.separated(
                         itemCount: docs.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
+                        separatorBuilder: (_, __) => const SizedBox(height: 8),
                         itemBuilder: (context, index) {
                           final data = docs[index].data();
-                          final drinks = data['drinks'];
-                          final note = data['note'] as String?;
+                          final drinkName = data['drinkName'] as String? ?? '-';
+                          final alcoholPercent =
+                              (data['alcoholPercent'] as num?)?.toDouble();
+                          final amount = (data['amount'] as num?)?.toInt();
                           final createdAt = data['createdAt'] as Timestamp?;
+
+                          final subtitle =
+                              'Alcohol: ${alcoholPercent != null ? '${alcoholPercent.toStringAsFixed(1)}%' : '-'}'
+                              '  •  Amount: ${amount != null ? '${amount}ml' : '-'}'
+                              '\n${_formatTimestamp(createdAt)}';
 
                           return Card(
                             child: ListTile(
-                              title: Text('Drinks: ${drinks ?? '-'}'),
-                              subtitle: Text(
-                                (note != null && note.isNotEmpty)
-                                    ? '$note\n${_formatTimestamp(createdAt)}'
-                                    : _formatTimestamp(createdAt),
-                              ),
-                              isThreeLine: note != null && note.isNotEmpty,
+                              leading: const Icon(Icons.local_bar),
+                              title: Text(drinkName),
+                              subtitle: Text(subtitle),
+                              isThreeLine: true,
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -425,8 +537,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                     tooltip: 'Edit',
                                     onPressed: () => _editEntry(
                                       docs[index].id,
-                                      (drinks as num).toInt(),
-                                      note,
+                                      drinkName,
+                                      alcoholPercent ?? 0.0,
+                                      amount ?? 0,
                                     ),
                                   ),
                                   IconButton(
