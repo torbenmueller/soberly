@@ -16,65 +16,68 @@ Future<TrackingEntry?> showEditTrackingEntryDialog({
     return await showDialog<TrackingEntry>(
       context: context,
       builder: (ctx) => AlertDialog(
+        scrollable: true,
         title: const Text('Edit entry'),
-        content: Form(
-          key: editFormKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'Drink Name',
-                  border: OutlineInputBorder(),
+        content: SingleChildScrollView(
+          child: Form(
+            key: editFormKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameCtrl,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    labelText: 'Drink Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a drink name.';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a drink name.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: alcoholCtrl,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: alcoholCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Alcohol %',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    final text = value?.trim().replaceAll(',', '.') ?? '';
+                    if (text.isEmpty) return 'Please enter alcohol percentage.';
+                    final v = double.tryParse(text);
+                    if (v == null || v < 0 || v > 100) {
+                      return 'Enter a value between 0 and 100.';
+                    }
+                    return null;
+                  },
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Alcohol %',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: amountCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Amount (ml)',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    final text = value?.trim() ?? '';
+                    if (text.isEmpty) return 'Please enter an amount.';
+                    final v = int.tryParse(text);
+                    if (v == null || v <= 0) {
+                      return 'Enter a whole number greater than 0.';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  final text = value?.trim().replaceAll(',', '.') ?? '';
-                  if (text.isEmpty) return 'Please enter alcohol percentage.';
-                  final v = double.tryParse(text);
-                  if (v == null || v < 0 || v > 100) {
-                    return 'Enter a value between 0 and 100.';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: amountCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Amount (ml)',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  final text = value?.trim() ?? '';
-                  if (text.isEmpty) return 'Please enter an amount.';
-                  final v = int.tryParse(text);
-                  if (v == null || v <= 0) {
-                    return 'Enter a whole number greater than 0.';
-                  }
-                  return null;
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         actions: [
@@ -104,8 +107,10 @@ Future<TrackingEntry?> showEditTrackingEntryDialog({
       ),
     );
   } finally {
-    nameCtrl.dispose();
-    alcoholCtrl.dispose();
-    amountCtrl.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      nameCtrl.dispose();
+      alcoholCtrl.dispose();
+      amountCtrl.dispose();
+    });
   }
 }

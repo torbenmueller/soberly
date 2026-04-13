@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
@@ -222,31 +221,36 @@ class _TrackingScreenState extends State<TrackingScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                AddNewDrinkCard(
-                  drinkNameController: _drinkNameController,
-                  alcoholController: _alcoholController,
-                  amountController: _amountController,
-                  isSubmitting: _isSubmitting,
-                  onSubmit: _submitTrackingEntry,
-                ),
-                const SizedBox(height: 16),
-                TrackingEntriesSection(
-                  stream: _trackingEntriesStream(),
-                  onEdit: _editEntry,
-                  onDelete: (entry) {
-                    final entryId = entry.id;
-                    if (entryId == null) {
-                      return;
-                    }
-                    _deleteEntry(entryId);
-                  },
-                ),
-              ],
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  AddNewDrinkCard(
+                    drinkNameController: _drinkNameController,
+                    alcoholController: _alcoholController,
+                    amountController: _amountController,
+                    isSubmitting: _isSubmitting,
+                    onSubmit: _submitTrackingEntry,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 300,
+                    child: TrackingEntriesSection(
+                      stream: _trackingEntriesStream(),
+                      onEdit: _editEntry,
+                      onDelete: (entry) {
+                        final entryId = entry.id;
+                        if (entryId == null) {
+                          return;
+                        }
+                        _deleteEntry(entryId);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

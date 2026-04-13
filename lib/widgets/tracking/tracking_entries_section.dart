@@ -27,59 +27,57 @@ class TrackingEntriesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Your entries',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: StreamBuilder<List<TrackingEntry>>(
-              stream: stream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Could not load entries.'));
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Your entries',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: StreamBuilder<List<TrackingEntry>>(
+            stream: stream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const Center(child: Text('Could not load entries.'));
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                final entries = snapshot.data ?? const <TrackingEntry>[];
-                if (entries.isEmpty) {
-                  return const Center(
-                    child: Text('No entries yet. Add your first one above.'),
-                  );
-                }
-
-                return ListView.separated(
-                  itemCount: entries.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final entry = entries[index];
-                    final drinkName = entry.drinkName.isEmpty
-                        ? '-'
-                        : entry.drinkName;
-                    final subtitle =
-                        'Alcohol: ${entry.alcoholPercent.toStringAsFixed(1)}%'
-                        '  •  Amount: ${entry.amount}ml'
-                        '\n${_formatTimestamp(entry.createdAt)}';
-
-                    return TrackingEntryTile(
-                      drinkName: drinkName,
-                      subtitle: subtitle,
-                      onEdit: () => onEdit(entry),
-                      onDelete: entry.id == null ? null : () => onDelete(entry),
-                    );
-                  },
+              final entries = snapshot.data ?? const <TrackingEntry>[];
+              if (entries.isEmpty) {
+                return const Center(
+                  child: Text('No entries yet. Add your first one above.'),
                 );
-              },
-            ),
+              }
+
+              return ListView.separated(
+                itemCount: entries.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  final drinkName = entry.drinkName.isEmpty
+                      ? '-'
+                      : entry.drinkName;
+                  final subtitle =
+                      'Alcohol: ${entry.alcoholPercent.toStringAsFixed(1)}%'
+                      '  •  Amount: ${entry.amount}ml'
+                      '\n${_formatTimestamp(entry.createdAt)}';
+
+                  return TrackingEntryTile(
+                    drinkName: drinkName,
+                    subtitle: subtitle,
+                    onEdit: () => onEdit(entry),
+                    onDelete: entry.id == null ? null : () => onDelete(entry),
+                  );
+                },
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
