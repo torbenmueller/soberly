@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
+import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
 import 'package:soberly/widgets/tracking/delete_tracking_entry_dialog.dart';
 import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
@@ -33,16 +34,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   }
 
   void _redirectIfUnauthenticated() {
-    if (_auth.currentUser != null) {
-      return;
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      Navigator.pushReplacementNamed(context, LoginScreen.id, arguments: true);
-    });
+    redirectToLoginIfUnauthenticated(context, auth: _auth);
   }
 
   @override

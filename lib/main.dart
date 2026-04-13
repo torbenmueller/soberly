@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/screens/welcome_screen.dart';
+import 'package:soberly/utils/auth_guard.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,13 +37,8 @@ class Soberly extends StatelessWidget {
         WelcomeScreen.id: (context) => const WelcomeScreen(),
         LoginScreen.id: (context) => const LoginScreen(),
         RegistrationScreen.id: (context) => const RegistrationScreen(),
-        TrackingScreen.id: (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) {
-            return const LoginScreen(showUnauthRedirectMessage: true);
-          }
-          return const TrackingScreen();
-        },
+        TrackingScreen.id: (context) =>
+            buildAuthGuardedScreen(authenticatedChild: const TrackingScreen()),
       },
     );
   }
