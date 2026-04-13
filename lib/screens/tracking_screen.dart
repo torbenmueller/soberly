@@ -5,6 +5,7 @@ import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
 import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
+import 'package:soberly/widgets/tracking/delete_tracking_entry_dialog.dart';
 import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 
@@ -136,25 +137,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
   }
 
   Future<void> _deleteEntry(String docId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete entry'),
-        content: const Text('Are you sure you want to delete this entry?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+    final confirmed = await showDeleteTrackingEntryDialog(context: context);
 
-    if (confirmed != true) {
+    if (!confirmed) {
       return;
     }
 
