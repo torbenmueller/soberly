@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
+import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
 import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
 
 class TrackingScreen extends StatefulWidget {
@@ -257,103 +258,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                // ── Add New Drink card ──────────────────────────────────
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Card title row
-                        const Row(
-                          children: [
-                            Icon(Icons.local_bar, size: 22),
-                            SizedBox(width: 8),
-                            Text(
-                              'Add New Drink',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Drink Name
-                        TextFormField(
-                          controller: _drinkNameController,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: const InputDecoration(
-                            labelText: 'Drink Name',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a drink name.';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        // Alcohol %
-                        TextFormField(
-                          controller: _alcoholController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: const InputDecoration(
-                            labelText: 'Alcohol %',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            final text =
-                                value?.trim().replaceAll(',', '.') ?? '';
-                            if (text.isEmpty) {
-                              return 'Please enter alcohol percentage.';
-                            }
-                            final v = double.tryParse(text);
-                            if (v == null || v < 0 || v > 100) {
-                              return 'Enter a value between 0 and 100.';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        // Amount (ml)
-                        TextFormField(
-                          controller: _amountController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Amount (ml)',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            final text = value?.trim() ?? '';
-                            if (text.isEmpty) return 'Please enter an amount.';
-                            final v = int.tryParse(text);
-                            if (v == null || v <= 0) {
-                              return 'Enter a whole number greater than 0.';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _isSubmitting
-                              ? null
-                              : _submitTrackingEntry,
-                          icon: const Icon(Icons.add),
-                          label: Text(
-                            _isSubmitting ? 'Saving...' : 'Add Drink',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                AddNewDrinkCard(
+                  drinkNameController: _drinkNameController,
+                  alcoholController: _alcoholController,
+                  amountController: _amountController,
+                  isSubmitting: _isSubmitting,
+                  onSubmit: _submitTrackingEntry,
                 ),
                 const SizedBox(height: 16),
                 const Text(
