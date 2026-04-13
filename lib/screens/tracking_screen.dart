@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/login_screen.dart';
+import 'package:soberly/services/tracking_repository.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -13,7 +15,7 @@ class TrackingScreen extends StatefulWidget {
 
 class _TrackingScreenState extends State<TrackingScreen> {
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+  final _trackingRepository = TrackingRepository();
   final _formKey = GlobalKey<FormState>();
   final _drinkNameController = TextEditingController();
   final _alcoholController = TextEditingController();
@@ -58,19 +60,14 @@ class _TrackingScreenState extends State<TrackingScreen> {
       return false;
     }
 
-    final data = <String, dynamic>{
-      'drinkName': drinkName,
-      'alcoholPercent': alcoholPercent,
-      'amount': amount,
-      'createdAt': FieldValue.serverTimestamp(),
-    };
+    final entry = TrackingEntry(
+      drinkName: drinkName,
+      alcoholPercent: alcoholPercent,
+      amount: amount,
+    );
 
     try {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('tracking_entries')
-          .add(data);
+      await _trackingRepository.addEntry(uid: user.uid, entry: entry);
       if (!mounted) {
         return true;
       }
@@ -126,18 +123,13 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> _trackingEntriesStream() {
+  Stream<List<TrackingEntry>> _trackingEntriesStream() {
     final user = _auth.currentUser;
     if (user == null) {
       return const Stream.empty();
     }
 
-    return _firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('tracking_entries')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+    return _trackingRepository.streamEntries(uid: user.uid);
   }
 
   String _formatTimestamp(Timestamp? timestamp) {
@@ -178,12 +170,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
 
     try {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('tracking_entries')
-          .doc(docId)
-          .delete();
+      await _trackingRepository.deleteEntry(uid: user.uid, entryId: docId);
     } on FirebaseException catch (e) {
       if (!mounted) {
         return;
@@ -196,17 +183,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
   }
 
-  Future<void> _editEntry(
-    String docId,
-    String currentDrinkName,
-    double currentAlcoholPercent,
-    int currentAmount,
-  ) async {
-    final nameCtrl = TextEditingController(text: currentDrinkName);
+  Future<void> _editEntry(TrackingEntry entry) async {
+    final nameCtrl = TextEditingController(text: entry.drinkName);
     final alcoholCtrl = TextEditingController(
-      text: currentAlcoholPercent.toString(),
+      text: entry.alcoholPercent.toString(),
     );
-    final amountCtrl = TextEditingController(text: currentAmount.toString());
+    final amountCtrl = TextEditingController(text: entry.amount.toString());
     final editFormKey = GlobalKey<FormState>();
 
     final confirmed = await showDialog<bool>(
@@ -305,25 +287,22 @@ class _TrackingScreenState extends State<TrackingScreen> {
       return;
     }
 
-    final updatedData = <String, dynamic>{
-      'drinkName': nameCtrl.text.trim(),
-      'alcoholPercent': double.parse(
+    final updatedEntry = TrackingEntry(
+      id: entry.id,
+      drinkName: nameCtrl.text.trim(),
+      alcoholPercent: double.parse(
         alcoholCtrl.text.trim().replaceAll(',', '.'),
       ),
-      'amount': int.parse(amountCtrl.text.trim()),
-    };
+      amount: int.parse(amountCtrl.text.trim()),
+      createdAt: entry.createdAt,
+    );
 
     nameCtrl.dispose();
     alcoholCtrl.dispose();
     amountCtrl.dispose();
 
     try {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('tracking_entries')
-          .doc(docId)
-          .update(updatedData);
+      await _trackingRepository.updateEntry(uid: user.uid, entry: updatedEntry);
       if (!mounted) {
         return;
       }
@@ -486,7 +465,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  child: StreamBuilder<List<TrackingEntry>>(
                     stream: _trackingEntriesStream(),
                     builder: (context, snapshot) {
                       if (snapshot.hasError) {
@@ -498,8 +477,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
 
-                      final docs = snapshot.data?.docs ?? const [];
-                      if (docs.isEmpty) {
+                      final entries = snapshot.data ?? const <TrackingEntry>[];
+                      if (entries.isEmpty) {
                         return const Center(
                           child: Text(
                             'No entries yet. Add your first one above.',
@@ -508,19 +487,20 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       }
 
                       return ListView.separated(
-                        itemCount: docs.length,
+                        itemCount: entries.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 8),
                         itemBuilder: (context, index) {
-                          final data = docs[index].data();
-                          final drinkName = data['drinkName'] as String? ?? '-';
-                          final alcoholPercent =
-                              (data['alcoholPercent'] as num?)?.toDouble();
-                          final amount = (data['amount'] as num?)?.toInt();
-                          final createdAt = data['createdAt'] as Timestamp?;
+                          final entry = entries[index];
+                          final drinkName = entry.drinkName.isEmpty
+                              ? '-'
+                              : entry.drinkName;
+                          final alcoholPercent = entry.alcoholPercent;
+                          final amount = entry.amount;
+                          final createdAt = entry.createdAt;
 
                           final subtitle =
-                              'Alcohol: ${alcoholPercent != null ? '${alcoholPercent.toStringAsFixed(1)}%' : '-'}'
-                              '  •  Amount: ${amount != null ? '${amount}ml' : '-'}'
+                              'Alcohol: ${alcoholPercent.toStringAsFixed(1)}%'
+                              '  •  Amount: ${amount}ml'
                               '\n${_formatTimestamp(createdAt)}';
 
                           return Card(
@@ -535,12 +515,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.edit, size: 20),
                                     tooltip: 'Edit',
-                                    onPressed: () => _editEntry(
-                                      docs[index].id,
-                                      drinkName,
-                                      alcoholPercent ?? 0.0,
-                                      amount ?? 0,
-                                    ),
+                                    onPressed: () => _editEntry(entry),
                                   ),
                                   IconButton(
                                     icon: const Icon(
@@ -549,8 +524,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
                                       color: Colors.red,
                                     ),
                                     tooltip: 'Delete',
-                                    onPressed: () =>
-                                        _deleteEntry(docs[index].id),
+                                    onPressed: entry.id == null
+                                        ? null
+                                        : () => _deleteEntry(entry.id!),
                                   ),
                                 ],
                               ),
