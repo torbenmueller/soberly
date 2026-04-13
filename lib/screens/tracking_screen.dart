@@ -6,6 +6,7 @@ import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
 import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
 import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
+import 'package:soberly/widgets/tracking/tracking_entry_tile.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -310,34 +311,13 @@ class _TrackingScreenState extends State<TrackingScreen> {
                               '  •  Amount: ${amount}ml'
                               '\n${_formatTimestamp(createdAt)}';
 
-                          return Card(
-                            child: ListTile(
-                              leading: const Icon(Icons.local_bar),
-                              title: Text(drinkName),
-                              subtitle: Text(subtitle),
-                              isThreeLine: true,
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, size: 20),
-                                    tooltip: 'Edit',
-                                    onPressed: () => _editEntry(entry),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      size: 20,
-                                      color: Colors.red,
-                                    ),
-                                    tooltip: 'Delete',
-                                    onPressed: entry.id == null
-                                        ? null
-                                        : () => _deleteEntry(entry.id!),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          return TrackingEntryTile(
+                            drinkName: drinkName,
+                            subtitle: subtitle,
+                            onEdit: () => _editEntry(entry),
+                            onDelete: entry.id == null
+                                ? null
+                                : () => _deleteEntry(entry.id!),
                           );
                         },
                       );
