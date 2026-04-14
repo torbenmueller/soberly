@@ -4,16 +4,16 @@ import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/widgets/tracking/tracking_entry_tile.dart';
 
 class TrackingEntriesSection extends StatelessWidget {
+  final Stream<List<TrackingEntry>> stream;
+  final ValueChanged<TrackingEntry> onEdit;
+  final ValueChanged<TrackingEntry> onDelete;
+
   const TrackingEntriesSection({
     super.key,
     required this.stream,
     required this.onEdit,
     required this.onDelete,
   });
-
-  final Stream<List<TrackingEntry>> stream;
-  final ValueChanged<TrackingEntry> onEdit;
-  final ValueChanged<TrackingEntry> onDelete;
 
   String _formatTimestamp(Timestamp? timestamp) {
     if (timestamp == null) {
@@ -55,15 +55,16 @@ class TrackingEntriesSection extends StatelessWidget {
 
               return ListView.separated(
                 itemCount: entries.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
                   final entry = entries[index];
                   final drinkName = entry.drinkName.isEmpty
                       ? '-'
                       : entry.drinkName;
+                  final pureAlcohol =
+                      entry.amount * (entry.alcoholPercent / 100) * 0.789;
                   final subtitle =
-                      'Alcohol: ${entry.alcoholPercent.toStringAsFixed(1)}%'
-                      '  •  Amount: ${entry.amount}ml'
+                      '${entry.alcoholPercent.toStringAsFixed(1)}%  •  ${entry.amount}ml  • ${pureAlcohol.toStringAsFixed(1)}g'
                       '\n${_formatTimestamp(entry.createdAt)}';
 
                   return TrackingEntryTile(

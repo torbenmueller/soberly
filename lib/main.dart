@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:soberly/screens/login_screen.dart';
+import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/screens/welcome_screen.dart';
@@ -37,6 +38,7 @@ class Soberly extends StatelessWidget {
         WelcomeScreen.id: (context) => const WelcomeScreen(),
         LoginScreen.id: (context) => const LoginScreen(),
         RegistrationScreen.id: (context) => const RegistrationScreen(),
+        ProfileSetupScreen.id: (context) => const ProfileSetupScreen(),
         TrackingScreen.id: (context) =>
             buildAuthGuardedScreen(authenticatedChild: const TrackingScreen()),
       },

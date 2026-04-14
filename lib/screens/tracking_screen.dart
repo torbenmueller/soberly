@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/login_screen.dart';
+import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
 import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
@@ -30,10 +31,33 @@ class _TrackingScreenState extends State<TrackingScreen> {
   void initState() {
     super.initState();
     _redirectIfUnauthenticated();
+    _redirectIfProfileIncomplete();
   }
 
   void _redirectIfUnauthenticated() {
     redirectToLoginIfUnauthenticated(context, auth: _auth);
+  }
+
+  Future<void> _redirectIfProfileIncomplete() async {
+    if (_auth.currentUser == null) {
+      return;
+    }
+
+    final hasProfile = await hasRequiredProfileForTracking(auth: _auth);
+    if (hasProfile) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Navigator.pushReplacementNamed(context, ProfileSetupScreen.id);
+    });
   }
 
   @override
@@ -193,6 +217,17 @@ class _TrackingScreenState extends State<TrackingScreen> {
       appBar: AppBar(
         leading: null,
         actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.manage_accounts),
+            tooltip: 'Edit profile',
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                ProfileSetupScreen.id,
+                arguments: true,
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {

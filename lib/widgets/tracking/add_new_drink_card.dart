@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soberly/components/app_button.dart';
 
 class AddNewDrinkCard extends StatelessWidget {
   const AddNewDrinkCard({
@@ -94,10 +95,20 @@ class AddNewDrinkCard extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: isSubmitting ? null : onSubmit,
-              icon: const Icon(Icons.add),
-              label: Text(isSubmitting ? 'Saving...' : 'Add Drink'),
+            // ElevatedButton.icon(
+            //   onPressed: isSubmitting ? null : onSubmit,
+            //   icon: const Icon(Icons.add),
+            //   label: Text(isSubmitting ? 'Saving...' : 'Add Drink'),
+            // ),
+            AppButton(
+              title: isSubmitting ? 'Saving...' : 'Add Drink',
+              color: Color(0xff72DBF2),
+              onPressed: () {
+                if (isSubmitting) {
+                  return;
+                }
+                onSubmit();
+              },
             ),
           ],
         ),

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/components/app_button.dart';
-import 'package:soberly/screens/tracking_screen.dart';
+import 'package:soberly/utils/auth_guard.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = 'registration_screen';
@@ -81,7 +81,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       return;
                     }
                     if (userCredential.user != null) {
-                      Navigator.pushNamed(context, TrackingScreen.id);
+                      await navigateAfterAuth(context, auth: _auth);
                     }
                   } catch (e) {
                     debugPrint('$e');
