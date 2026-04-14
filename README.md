@@ -28,15 +28,8 @@ git add .gitignore android/.gitignore
 git commit -m "Stop tracking Firebase config"
 ```
 
-For GitHub Actions, this repo uses `GOOGLE_SERVICES_JSON_BASE64`.
-Create the secret value from your local `google-services.json`:
-
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("android/app/google-services.json"))
-```
-
-Copy the output and save it as a repository secret named
-`GOOGLE_SERVICES_JSON_BASE64` in GitHub.
+If you set up CI later, inject `android/app/google-services.json` from a
+private secret instead of committing the file.
 
 Important: rotate exposed API keys and apply Android app/API restrictions in
 Google Cloud Console.

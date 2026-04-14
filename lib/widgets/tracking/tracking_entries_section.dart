@@ -49,7 +49,7 @@ class TrackingEntriesSection extends StatelessWidget {
               final entries = snapshot.data ?? const <TrackingEntry>[];
               if (entries.isEmpty) {
                 return const Center(
-                  child: Text('No entries yet. Add your first one above.'),
+                  child: Text('No entries yet. Tap + to add your first drink.'),
                 );
               }
 

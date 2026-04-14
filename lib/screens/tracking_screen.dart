@@ -105,10 +105,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
   }
 
-  Future<void> _submitTrackingEntry() async {
+  Future<bool> _submitTrackingEntry() async {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) {
-      return;
+      return false;
     }
 
     final drinkName = _drinkNameController.text.trim();
@@ -128,7 +128,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     );
 
     if (!mounted) {
-      return;
+      return saved;
     }
 
     setState(() {
@@ -140,6 +140,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
       _alcoholController.clear();
       _amountController.clear();
     }
+
+    return saved;
   }
 
   Stream<List<TrackingEntry>> _trackingEntriesStream() {
@@ -253,40 +255,59 @@ class _TrackingScreenState extends State<TrackingScreen> {
           ],
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  AddNewDrinkCard(
-                    drinkNameController: _drinkNameController,
-                    alcoholController: _alcoholController,
-                    amountController: _amountController,
-                    isSubmitting: _isSubmitting,
-                    onSubmit: _submitTrackingEntry,
+      floatingActionButton: SizedBox.square(
+        dimension: 60,
+        child: FloatingActionButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (bottomSheetContext) => SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
                   ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 300,
-                    child: TrackingEntriesSection(
-                      stream: _trackingEntriesStream(),
-                      onEdit: _editEntry,
-                      onDelete: (entry) {
-                        final entryId = entry.id;
-                        if (entryId == null) {
+                  child: Form(
+                    key: _formKey,
+                    child: AddNewDrinkCard(
+                      drinkNameController: _drinkNameController,
+                      alcoholController: _alcoholController,
+                      amountController: _amountController,
+                      isSubmitting: _isSubmitting,
+                      onSubmit: () async {
+                        final saved = await _submitTrackingEntry();
+                        if (!bottomSheetContext.mounted) {
                           return;
                         }
-                        _deleteEntry(entryId);
+                        if (saved) {
+                          FocusScope.of(bottomSheetContext).unfocus();
+                          Navigator.pop(bottomSheetContext);
+                        }
                       },
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
+            );
+          },
+          backgroundColor: Colors.lightBlueAccent,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add, color: Colors.white, size: 30),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: TrackingEntriesSection(
+            stream: _trackingEntriesStream(),
+            onEdit: _editEntry,
+            onDelete: (entry) {
+              final entryId = entry.id;
+              if (entryId == null) {
+                return;
+              }
+              _deleteEntry(entryId);
+            },
           ),
         ),
       ),

@@ -15,7 +15,7 @@ class AddNewDrinkCard extends StatelessWidget {
   final TextEditingController alcoholController;
   final TextEditingController amountController;
   final bool isSubmitting;
-  final VoidCallback onSubmit;
+  final Future<void> Function() onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -103,11 +103,11 @@ class AddNewDrinkCard extends StatelessWidget {
             AppButton(
               title: isSubmitting ? 'Saving...' : 'Add Drink',
               color: Color(0xff72DBF2),
-              onPressed: () {
+              onPressed: () async {
                 if (isSubmitting) {
                   return;
                 }
-                onSubmit();
+                await onSubmit();
               },
             ),
           ],
