@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:soberly/screens/login_screen.dart';
-// import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/screens/registration_screen.dart';
-import 'package:soberly/screens/tracking_screen.dart';
+import 'package:soberly/constants.dart';
+import 'package:soberly/utils/auth_guard.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -15,8 +17,26 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
+  static const _autoForwardDelay = Duration(milliseconds: 500);
+
   late final AnimationController controller;
   late final Animation<Color?> animation;
+  Timer? _authForwardTimer;
+
+  void _forwardIfAuthenticated() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _authForwardTimer = Timer(_autoForwardDelay, () async {
+        if (!mounted || !isAuthenticated()) {
+          return;
+        }
+        await navigateAfterAuth(context);
+      });
+    });
+  }
 
   @override
   void initState() {
@@ -30,10 +50,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       end: Colors.white,
     ).animate(controller);
     controller.forward();
+    _forwardIfAuthenticated();
   }
 
   @override
   void dispose() {
+    _authForwardTimer?.cancel();
     controller.dispose();
     super.dispose();
   }
@@ -43,7 +65,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return AnimatedBuilder(
       animation: animation,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: kEdgeInsetsSymmetricHorizontal,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,23 +80,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 48.0),
-            AppButton(
-              title: 'Log In',
-              color: Color(0xff72DBF2),
-              onPressed: () => Navigator.pushNamed(context, LoginScreen.id),
-            ),
-            AppButton(
-              title: 'Register',
-              color: Color(0xff52A8F2),
-              onPressed: () =>
-                  Navigator.pushNamed(context, RegistrationScreen.id),
-            ),
-            AppButton(
-              title: 'Tracking Screen',
-              color: Colors.red,
-              onPressed: () => Navigator.pushNamed(context, TrackingScreen.id),
-            ),
+            if (!isAuthenticated()) ...[
+              const SizedBox(height: 48.0),
+              AppButton(
+                title: 'Log In',
+                color: kPrimaryColor,
+                onPressed: () => Navigator.pushNamed(context, LoginScreen.id),
+              ),
+              AppButton(
+                title: 'Register',
+                color: Color(0xff52A8F2),
+                onPressed: () =>
+                    Navigator.pushNamed(context, RegistrationScreen.id),
+              ),
+            ],
           ],
         ),
       ),

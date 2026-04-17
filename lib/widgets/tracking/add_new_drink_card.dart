@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/components/app_button.dart';
+import 'package:soberly/constants.dart';
 
 class AddNewDrinkCard extends StatelessWidget {
   const AddNewDrinkCard({
@@ -19,11 +20,10 @@ class AddNewDrinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return SafeArea(
+      top: false,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: kEdgeInsetsAll,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -95,14 +95,9 @@ class AddNewDrinkCard extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            // ElevatedButton.icon(
-            //   onPressed: isSubmitting ? null : onSubmit,
-            //   icon: const Icon(Icons.add),
-            //   label: Text(isSubmitting ? 'Saving...' : 'Add Drink'),
-            // ),
             AppButton(
               title: isSubmitting ? 'Saving...' : 'Add Drink',
-              color: Color(0xff72DBF2),
+              color: kPrimaryColor,
               onPressed: () async {
                 if (isSubmitting) {
                   return;

@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         color: Colors.black.withValues(alpha: 0.5),
         isLoading: _isLoading,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.0),
+          padding: kEdgeInsetsSymmetricHorizontal,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 24.0),
               AppButton(
                 title: 'Log In',
-                color: Color(0xff72DBF2),
+                color: kPrimaryColor,
                 onPressed: () async {
                   setState(() {
                     _isLoading = true;

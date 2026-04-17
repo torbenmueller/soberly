@@ -5,6 +5,7 @@ import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/components/app_button.dart';
+import 'package:soberly/constants.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -119,7 +120,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: kEdgeInsetsAll,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -168,7 +169,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 title: _isSaving
                     ? 'Saving...'
                     : (_isOpenedFromSettings ? 'Save' : 'Continue'),
-                color: Color(0xff72DBF2),
+                color: kPrimaryColor,
                 onPressed: () {
                   if (_isSaving) {
                     return;

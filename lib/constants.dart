@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+const kPrimaryColor = Color(0xff72DBF2);
+const kSecondaryTextColor = Color(0xff757575);
+
+const kEdgeInsetsAll = EdgeInsets.all(16);
+const kEdgeInsetsSymmetricHorizontal = EdgeInsets.symmetric(horizontal: 24);
+
 const kTextFieldDecoration = InputDecoration(
   hintText: 'Enter a value',
   contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),

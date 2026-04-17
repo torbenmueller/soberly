@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:soberly/models/tracking_entry.dart';
-import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
-import 'package:soberly/services/tracking_repository.dart';
-import 'package:soberly/utils/auth_guard.dart';
+import 'package:soberly/screens/tracking_screen_controller.dart';
 import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
-import 'package:soberly/widgets/tracking/delete_tracking_entry_dialog.dart';
-import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
+import 'package:soberly/constants.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -19,198 +15,147 @@ class TrackingScreen extends StatefulWidget {
 }
 
 class _TrackingScreenState extends State<TrackingScreen> {
-  final _auth = FirebaseAuth.instance;
-  final _trackingRepository = TrackingRepository();
-  final _formKey = GlobalKey<FormState>();
-  final _drinkNameController = TextEditingController();
-  final _alcoholController = TextEditingController();
-  final _amountController = TextEditingController();
-  bool _isSubmitting = false;
+  late final TrackingScreenController _controller;
+  late final Future<double> _dailyLimitFuture;
 
   @override
   void initState() {
     super.initState();
-    _redirectIfUnauthenticated();
-    _redirectIfProfileIncomplete();
-  }
-
-  void _redirectIfUnauthenticated() {
-    redirectToLoginIfUnauthenticated(context, auth: _auth);
-  }
-
-  Future<void> _redirectIfProfileIncomplete() async {
-    if (_auth.currentUser == null) {
-      return;
-    }
-
-    final hasProfile = await hasRequiredProfileForTracking(auth: _auth);
-    if (hasProfile) {
-      return;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      Navigator.pushReplacementNamed(context, ProfileSetupScreen.id);
-    });
+    _controller = TrackingScreenController();
+    _controller.redirectIfUnauthenticated(context);
+    _controller.redirectIfProfileIncomplete(context);
+    _dailyLimitFuture = _controller.getDailyLimitGrams();
   }
 
   @override
   void dispose() {
-    _drinkNameController.dispose();
-    _alcoholController.dispose();
-    _amountController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  Future<bool> addTrackingEntry({
-    required String drinkName,
-    required double alcoholPercent,
-    required int amount,
-  }) async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      _redirectIfUnauthenticated();
-      return false;
-    }
-
-    final entry = TrackingEntry(
-      drinkName: drinkName,
-      alcoholPercent: alcoholPercent,
-      amount: amount,
-    );
-
-    try {
-      await _trackingRepository.addEntry(uid: user.uid, entry: entry);
-      if (!mounted) {
-        return true;
-      }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Drink entry saved.')));
-      return true;
-    } on FirebaseException catch (e) {
-      if (!mounted) {
-        return false;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not save entry: ${e.message ?? e.code}')),
-      );
-      return false;
-    }
-  }
-
-  Future<bool> _submitTrackingEntry() async {
-    final form = _formKey.currentState;
-    if (form == null || !form.validate()) {
-      return false;
-    }
-
-    final drinkName = _drinkNameController.text.trim();
-    final alcoholPercent = double.parse(
-      _alcoholController.text.trim().replaceAll(',', '.'),
-    );
-    final amount = int.parse(_amountController.text.trim());
-
-    setState(() {
-      _isSubmitting = true;
-    });
-
-    final saved = await addTrackingEntry(
-      drinkName: drinkName,
-      alcoholPercent: alcoholPercent,
-      amount: amount,
-    );
-
-    if (!mounted) {
-      return saved;
-    }
-
-    setState(() {
-      _isSubmitting = false;
-    });
-
-    if (saved) {
-      _drinkNameController.clear();
-      _alcoholController.clear();
-      _amountController.clear();
-    }
-
-    return saved;
-  }
-
-  Stream<List<TrackingEntry>> _trackingEntriesStream() {
-    final user = _auth.currentUser;
-    if (user == null) {
-      return const Stream.empty();
-    }
-
-    return _trackingRepository.streamEntries(uid: user.uid);
-  }
-
-  Future<void> _deleteEntry(String docId) async {
-    final confirmed = await showDeleteTrackingEntryDialog(context: context);
-
-    if (!confirmed) {
-      return;
-    }
-
-    final user = _auth.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    try {
-      await _trackingRepository.deleteEntry(uid: user.uid, entryId: docId);
-    } on FirebaseException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not delete entry: ${e.message ?? e.code}'),
-        ),
-      );
-    }
-  }
-
-  Future<void> _editEntry(TrackingEntry entry) async {
-    final updatedEntry = await showEditTrackingEntryDialog(
+  void _openAddDrinkSheet() {
+    showModalBottomSheet(
       context: context,
-      entry: entry,
-    );
-    if (updatedEntry == null || !mounted) {
-      return;
-    }
-
-    final user = _auth.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    try {
-      await _trackingRepository.updateEntry(uid: user.uid, entry: updatedEntry);
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Entry updated.')));
-    } on FirebaseException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not update entry: ${e.message ?? e.code}'),
+      isScrollControlled: true,
+      builder: (sheetContext) => ListenableBuilder(
+        listenable: _controller,
+        builder: (_, _) => SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: Form(
+              key: _controller.formKey,
+              child: AddNewDrinkCard(
+                drinkNameController: _controller.drinkNameController,
+                alcoholController: _controller.alcoholController,
+                amountController: _controller.amountController,
+                isSubmitting: _controller.isSubmitting,
+                onSubmit: () async {
+                  final saved = await _controller.submitEntry(context);
+                  if (!sheetContext.mounted) return;
+                  if (saved) {
+                    FocusScope.of(sheetContext).unfocus();
+                    Navigator.pop(sheetContext);
+                  }
+                },
+              ),
+            ),
+          ),
         ),
-      );
-    }
+      ),
+    );
+  }
+
+  String _formatGrams(double grams) {
+    return grams.toStringAsFixed(1);
+  }
+
+  Widget _buildHealthStatusCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: kEdgeInsetsAll,
+        child: FutureBuilder<double>(
+          future: _dailyLimitFuture,
+          builder: (context, dailyLimitSnapshot) {
+            final dailyLimit = dailyLimitSnapshot.data ?? 0.0;
+
+            return StreamBuilder<List<TrackingEntry>>(
+              stream: _controller.entriesStream,
+              builder: (context, snapshot) {
+                final entries = snapshot.data ?? const <TrackingEntry>[];
+                final todayGrams = _controller.computeTodayAlcoholGrams(
+                  entries,
+                );
+                // final remaining = (dailyLimit - todayGrams).clamp(
+                //   0.0,
+                //   dailyLimit,
+                // );
+                final remaining = dailyLimit - todayGrams;
+                final isWithinLimit = remaining >= 0;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.favorite, size: 22),
+                        SizedBox(width: 8),
+                        Text(
+                          'Health Status',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Today: ${_formatGrams(todayGrams)} g alcohol',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isWithinLimit ? Colors.green : Colors.red,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            '${isWithinLimit ? '-' : '+'} ${_formatGrams(remaining.abs())} g',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      'Your daily limit is ${_formatGrams(dailyLimit)} g alcohol.',
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: kSecondaryTextColor,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -222,27 +167,15 @@ class _TrackingScreenState extends State<TrackingScreen> {
           IconButton(
             icon: const Icon(Icons.manage_accounts),
             tooltip: 'Edit profile',
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                ProfileSetupScreen.id,
-                arguments: true,
-              );
-            },
+            onPressed: () => Navigator.pushNamed(
+              context,
+              ProfileSetupScreen.id,
+              arguments: true,
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await _auth.signOut();
-              if (!context.mounted) {
-                return;
-              }
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                LoginScreen.id,
-                (route) => false,
-              );
-            },
+            onPressed: () => _controller.signOut(context),
           ),
         ],
         title: Row(
@@ -258,56 +191,31 @@ class _TrackingScreenState extends State<TrackingScreen> {
       floatingActionButton: SizedBox.square(
         dimension: 60,
         child: FloatingActionButton(
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (bottomSheetContext) => SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: AddNewDrinkCard(
-                      drinkNameController: _drinkNameController,
-                      alcoholController: _alcoholController,
-                      amountController: _amountController,
-                      isSubmitting: _isSubmitting,
-                      onSubmit: () async {
-                        final saved = await _submitTrackingEntry();
-                        if (!bottomSheetContext.mounted) {
-                          return;
-                        }
-                        if (saved) {
-                          FocusScope.of(bottomSheetContext).unfocus();
-                          Navigator.pop(bottomSheetContext);
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-          backgroundColor: Colors.lightBlueAccent,
+          onPressed: _openAddDrinkSheet,
+          backgroundColor: kPrimaryColor,
           shape: const CircleBorder(),
-          child: const Icon(Icons.add, color: Colors.white, size: 30),
+          child: const Icon(Icons.add, color: Colors.black, size: 30),
         ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: TrackingEntriesSection(
-            stream: _trackingEntriesStream(),
-            onEdit: _editEntry,
-            onDelete: (entry) {
-              final entryId = entry.id;
-              if (entryId == null) {
-                return;
-              }
-              _deleteEntry(entryId);
-            },
+          padding: kEdgeInsetsAll,
+          child: Column(
+            children: [
+              _buildHealthStatusCard(),
+              const SizedBox(height: 16),
+              Expanded(
+                child: TrackingEntriesSection(
+                  stream: _controller.entriesStream,
+                  onEdit: (entry) => _controller.editEntry(context, entry),
+                  onDelete: (entry) {
+                    final entryId = entry.id;
+                    if (entryId == null) return;
+                    _controller.deleteEntry(context, entryId);
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
