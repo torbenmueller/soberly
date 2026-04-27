@@ -22,7 +22,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController controller;
   late final Animation<Color?> animation;
   Timer? _authForwardTimer;
-  bool _didPrecacheBackground = false;
 
   void _forwardIfAuthenticated() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,7 +46,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       vsync: this,
     );
     animation = ColorTween(
-      begin: Color(0xff284C54),
+      begin: const Color(0xff1a3a40),
       end: kAppBackgroundBaseColor,
     ).animate(controller);
     controller.forward();
@@ -59,16 +58,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _authForwardTimer?.cancel();
     controller.dispose();
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_didPrecacheBackground) {
-      return;
-    }
-    _didPrecacheBackground = true;
-    precacheImage(const AssetImage(kAppBackgroundImagePath), context);
   }
 
   @override
@@ -93,7 +82,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
             const SizedBox(height: 24.0),
             Text(
-              'Track your alcohol intake and stay mindful of your habits with Soberly. No level of alcohol consumption is completely risk-free.',
+              'Track your drinking mindfully, set personal goals, and build healthier habits - one day at a time.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18.0, color: Colors.white),
             ),

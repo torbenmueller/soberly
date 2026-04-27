@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 const kPrimaryColor = Color(0xff72DBF2);
 const kSecondaryTextColor = Color(0xff757575);
 
-const kAppBackgroundImagePath = 'images/soberly_background_2.jpg';
-const kAppBackgroundOpacity = 0.25;
-const kAppBackgroundBaseColor = Colors.black;
+const kAppBackgroundBaseColor = Color(0xff0d1f22);
+const kAppBackgroundGradient = [Color(0xff1a3a40), Color(0xff0d1f22)];
 
 const kEdgeInsetsAll = EdgeInsets.all(16);
 const kEdgeInsetsSymmetricHorizontal = EdgeInsets.symmetric(horizontal: 24);

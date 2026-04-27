@@ -6,6 +6,7 @@ import 'package:soberly/widgets/tracking/add_new_drink.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
+import 'package:soberly/widgets/soberly_app_bar.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -184,8 +185,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: null,
+      appBar: SoberlyAppBar(
+        automaticallyImplyLeading: false,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.manage_accounts),
@@ -201,14 +202,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
             onPressed: () => _controller.signOut(context),
           ),
         ],
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: 40.0,
-              child: Image.asset('images/soberly_logo.png'),
-            ),
-          ],
+        centerTitle: true,
+        title: SizedBox(
+          height: 40.0,
+          child: Image.asset('images/soberly_logo.png'),
         ),
       ),
       floatingActionButton: SizedBox.square(

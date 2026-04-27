@@ -32,7 +32,6 @@ class Soberly extends StatelessWidget {
           },
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.white),
           actionsIconTheme: IconThemeData(color: Colors.white),

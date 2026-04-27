@@ -7,6 +7,7 @@ import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
+import 'package:soberly/widgets/soberly_app_bar.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -116,7 +117,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: SoberlyAppBar(
         title: Text(_isOpenedFromSettings ? 'Edit Profile' : 'Profile Setup'),
       ),
       body: AppBackground(
