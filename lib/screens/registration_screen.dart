@@ -4,6 +4,7 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/utils/auth_guard.dart';
+import 'package:soberly/widgets/app_background.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = 'registration_screen';
@@ -22,78 +23,83 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: LoadingOverlay(
-        color: Colors.black.withValues(alpha: 0.5),
-        isLoading: _isLoading,
-        child: Padding(
-          padding: kEdgeInsetsSymmetricHorizontal,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Flexible(
-                child: Hero(
-                  tag: 'soberly_logo',
-                  child: SizedBox(
-                    height: 200.0,
-                    child: Image.asset('images/soberly_logo.png'),
+      body: AppBackground(
+        child: LoadingOverlay(
+          color: Colors.black.withValues(alpha: 0.5),
+          isLoading: _isLoading,
+          child: Padding(
+            padding: kEdgeInsetsSymmetricHorizontal,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Flexible(
+                  child: Hero(
+                    tag: 'soberly_logo',
+                    child: SizedBox(
+                      height: 200.0,
+                      child: Image.asset('images/soberly_logo.png'),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 48.0),
-              TextField(
-                keyboardType: TextInputType.emailAddress,
-                textAlign: TextAlign.center,
-                onChanged: (value) {
-                  email = value;
-                },
-                decoration: kTextFieldDecoration.copyWith(
-                  hintText: 'Enter your email',
+                SizedBox(height: 48.0),
+                TextField(
+                  keyboardType: TextInputType.emailAddress,
+                  textAlign: TextAlign.center,
+                  onChanged: (value) {
+                    email = value;
+                  },
+                  decoration: kTextFieldDecoration.copyWith(
+                    fillColor: Colors.white,
+                    filled: true,
+                    hintText: 'Enter your email',
+                  ),
                 ),
-              ),
-              SizedBox(height: 24.0),
-              TextField(
-                obscureText: true,
-                textAlign: TextAlign.center,
-                onChanged: (value) {
-                  password = value;
-                },
-                decoration: kTextFieldDecoration.copyWith(
-                  hintText: 'Enter your password',
+                SizedBox(height: 24.0),
+                TextField(
+                  obscureText: true,
+                  textAlign: TextAlign.center,
+                  onChanged: (value) {
+                    password = value;
+                  },
+                  decoration: kTextFieldDecoration.copyWith(
+                    fillColor: Colors.white,
+                    filled: true,
+                    hintText: 'Enter your password',
+                  ),
                 ),
-              ),
-              SizedBox(height: 24.0),
-              AppButton(
-                title: 'Register',
-                color: Color(0xff52A8F2),
-                onPressed: () async {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  try {
-                    final UserCredential userCredential = await _auth
-                        .createUserWithEmailAndPassword(
-                          email: email,
-                          password: password,
-                        );
-                    if (!context.mounted) {
-                      return;
-                    }
-                    if (userCredential.user != null) {
-                      await navigateAfterAuth(context, auth: _auth);
-                    }
-                  } catch (e) {
-                    debugPrint('$e');
-                  }
-                  if (context.mounted) {
+                SizedBox(height: 24.0),
+                AppButton(
+                  title: 'Create account',
+                  color: Color(0xff52A8F2),
+                  onPressed: () async {
                     setState(() {
-                      _isLoading = false;
+                      _isLoading = true;
                     });
-                  }
-                },
-              ),
-            ],
+                    try {
+                      final UserCredential userCredential = await _auth
+                          .createUserWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+                      if (!context.mounted) {
+                        return;
+                      }
+                      if (userCredential.user != null) {
+                        await navigateAfterAuth(context, auth: _auth);
+                      }
+                    } catch (e) {
+                      debugPrint('$e');
+                    }
+                    if (context.mounted) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

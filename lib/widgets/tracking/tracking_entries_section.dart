@@ -32,7 +32,11 @@ class TrackingEntriesSection extends StatelessWidget {
       children: [
         const Text(
           'Your entries',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 8),
         Expanded(

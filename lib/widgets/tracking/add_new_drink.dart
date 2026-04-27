@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
 
-class AddNewDrinkCard extends StatelessWidget {
-  const AddNewDrinkCard({
+class AddNewDrink extends StatelessWidget {
+  const AddNewDrink({
     super.key,
     required this.drinkNameController,
     required this.alcoholController,

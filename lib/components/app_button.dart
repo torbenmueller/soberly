@@ -15,7 +15,7 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
+      padding: EdgeInsets.symmetric(vertical: 12.0),
       child: Material(
         elevation: 5.0,
         color: color,

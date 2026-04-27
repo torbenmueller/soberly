@@ -1,11 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/utils/auth_guard.dart';
+import 'package:soberly/widgets/app_background.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -22,6 +22,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late final AnimationController controller;
   late final Animation<Color?> animation;
   Timer? _authForwardTimer;
+  bool _didPrecacheBackground = false;
 
   void _forwardIfAuthenticated() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -47,7 +48,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
     animation = ColorTween(
       begin: Color(0xff284C54),
-      end: Colors.white,
+      end: kAppBackgroundBaseColor,
     ).animate(controller);
     controller.forward();
     _forwardIfAuthenticated();
@@ -58,6 +59,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     _authForwardTimer?.cancel();
     controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrecacheBackground) {
+      return;
+    }
+    _didPrecacheBackground = true;
+    precacheImage(const AssetImage(kAppBackgroundImagePath), context);
   }
 
   @override
@@ -80,6 +91,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
               ),
             ),
+            const SizedBox(height: 24.0),
+            Text(
+              'Track your alcohol intake and stay mindful of your habits with Soberly. No level of alcohol consumption is completely risk-free.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18.0, color: Colors.white),
+            ),
             if (!isAuthenticated()) ...[
               const SizedBox(height: 48.0),
               AppButton(
@@ -87,18 +104,33 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 color: kPrimaryColor,
                 onPressed: () => Navigator.pushNamed(context, LoginScreen.id),
               ),
-              AppButton(
-                title: 'Register',
-                color: Color(0xff52A8F2),
+              const SizedBox(height: 24.0),
+              Text(
+                'Don\'t have an account yet?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.0, color: Colors.white),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Color(0xff52A8F2),
+                  textStyle: const TextStyle(
+                    fontSize: 18.0,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
                 onPressed: () =>
                     Navigator.pushNamed(context, RegistrationScreen.id),
+                child: const Text('Create a new account'),
               ),
             ],
           ],
         ),
       ),
       builder: (context, child) {
-        return Scaffold(backgroundColor: animation.value, body: child);
+        return Scaffold(
+          backgroundColor: kAppBackgroundBaseColor,
+          body: AppBackground(child: child!),
+        );
       },
     );
   }

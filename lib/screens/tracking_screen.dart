@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
-import 'package:soberly/screens/tracking_screen_controller.dart';
-import 'package:soberly/widgets/tracking/add_new_drink_card.dart';
+import 'package:soberly/controllers/tracking_screen_controller.dart';
+import 'package:soberly/widgets/tracking/add_new_drink.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
+import 'package:soberly/widgets/app_background.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -46,7 +47,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
             ),
             child: Form(
               key: _controller.formKey,
-              child: AddNewDrinkCard(
+              child: AddNewDrink(
                 drinkNameController: _controller.drinkNameController,
                 alcoholController: _controller.alcoholController,
                 amountController: _controller.amountController,
@@ -71,90 +72,112 @@ class _TrackingScreenState extends State<TrackingScreen> {
     return grams.toStringAsFixed(1);
   }
 
-  Widget _buildHealthStatusCard() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: kEdgeInsetsAll,
-        child: FutureBuilder<double>(
-          future: _dailyLimitFuture,
-          builder: (context, dailyLimitSnapshot) {
-            final dailyLimit = dailyLimitSnapshot.data ?? 0.0;
+  Widget _buildHealthStatusCard(double dailyLimit) {
+    return StreamBuilder<List<TrackingEntry>>(
+      stream: _controller.entriesStream,
+      builder: (context, snapshot) {
+        final entries = snapshot.data ?? const <TrackingEntry>[];
+        final todayGrams = _controller.computeTodayAlcoholGrams(entries);
+        final remaining = dailyLimit - todayGrams;
+        final isWithinLimit = remaining >= 0;
 
-            return StreamBuilder<List<TrackingEntry>>(
-              stream: _controller.entriesStream,
-              builder: (context, snapshot) {
-                final entries = snapshot.data ?? const <TrackingEntry>[];
-                final todayGrams = _controller.computeTodayAlcoholGrams(
-                  entries,
-                );
-                // final remaining = (dailyLimit - todayGrams).clamp(
-                //   0.0,
-                //   dailyLimit,
-                // );
-                final remaining = dailyLimit - todayGrams;
-                final isWithinLimit = remaining >= 0;
+        String riskLevel;
+        String riskText;
+        Color riskColor;
+        Color riskBackgroundColor;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        if (todayGrams <= dailyLimit) {
+          riskLevel = 'Low';
+          riskText = 'Within recommended limits';
+          riskColor = Colors.green.shade800;
+          riskBackgroundColor = Colors.green.shade50;
+        } else if (todayGrams <= dailyLimit * 2) {
+          riskLevel = 'Moderate';
+          riskText = 'Above recommended intake';
+          riskColor = Colors.orange.shade800;
+          riskBackgroundColor = Colors.orange.shade50;
+        } else {
+          riskLevel = 'High';
+          riskText = 'Significantly above recommended intake';
+          riskColor = Colors.red.shade800;
+          riskBackgroundColor = Colors.red.shade50;
+        }
+
+        return Card(
+          elevation: 2,
+          color: riskBackgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: kEdgeInsetsAll,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
                   children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.favorite, size: 22),
-                        SizedBox(width: 8),
-                        Text(
-                          'Health Status',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Today: ${_formatGrams(todayGrams)} g alcohol',
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isWithinLimit ? Colors.green : Colors.red,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            '${isWithinLimit ? '-' : '+'} ${_formatGrams(remaining.abs())} g',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      'Your daily limit is ${_formatGrams(dailyLimit)} g alcohol.',
+                    const Icon(Icons.favorite, size: 22),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Risk Level',
                       style: TextStyle(
-                        fontSize: 15,
-                        color: kSecondaryTextColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      riskLevel,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: riskColor,
                       ),
                     ),
                   ],
-                );
-              },
-            );
-          },
-        ),
-      ),
+                ),
+                Text(riskText, style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Today: ${_formatGrams(todayGrams)} g alcohol',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: riskColor,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${isWithinLimit ? '-' : '+'} ${_formatGrams(remaining.abs())} g',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDailyLimitText(double dailyLimit) {
+    return Text(
+      'Your daily limit is ${_formatGrams(dailyLimit)} g alcohol.',
+      style: TextStyle(fontSize: 16, color: Colors.white),
     );
   }
 
@@ -197,25 +220,35 @@ class _TrackingScreenState extends State<TrackingScreen> {
           child: const Icon(Icons.add, color: Colors.black, size: 30),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: kEdgeInsetsAll,
-          child: Column(
-            children: [
-              _buildHealthStatusCard(),
-              const SizedBox(height: 16),
-              Expanded(
-                child: TrackingEntriesSection(
-                  stream: _controller.entriesStream,
-                  onEdit: (entry) => _controller.editEntry(context, entry),
-                  onDelete: (entry) {
-                    final entryId = entry.id;
-                    if (entryId == null) return;
-                    _controller.deleteEntry(context, entryId);
-                  },
-                ),
-              ),
-            ],
+      body: AppBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: kEdgeInsetsAll,
+            child: FutureBuilder<double>(
+              future: _dailyLimitFuture,
+              builder: (context, snapshot) {
+                final dailyLimit = snapshot.data ?? 0.0;
+                return Column(
+                  children: [
+                    _buildHealthStatusCard(dailyLimit),
+                    _buildDailyLimitText(dailyLimit),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: TrackingEntriesSection(
+                        stream: _controller.entriesStream,
+                        onEdit: (entry) =>
+                            _controller.editEntry(context, entry),
+                        onDelete: (entry) {
+                          final entryId = entry.id;
+                          if (entryId == null) return;
+                          _controller.deleteEntry(context, entryId);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/screens/welcome_screen.dart';
 import 'package:soberly/utils/auth_guard.dart';
+import 'package:soberly/constants.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +22,17 @@ class Soberly extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        scaffoldBackgroundColor: kAppBackgroundBaseColor,
+        canvasColor: kAppBackgroundBaseColor,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: ZoomPageTransitionsBuilder(
+              backgroundColor: kAppBackgroundBaseColor,
+            ),
+          },
+        ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF424242),
+          backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           iconTheme: IconThemeData(color: Colors.white),
           actionsIconTheme: IconThemeData(color: Colors.white),

@@ -6,6 +6,7 @@ import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
+import 'package:soberly/widgets/app_background.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -118,66 +119,70 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       appBar: AppBar(
         title: Text(_isOpenedFromSettings ? 'Edit Profile' : 'Profile Setup'),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: kEdgeInsetsAll,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'To personalize alcohol safety estimates, please choose the sex used for physiological calculations.',
-              ),
-              const SizedBox(height: 16),
-              IgnorePointer(
-                ignoring: _isSaving,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 150),
-                  opacity: _isSaving ? 0.55 : 1,
-                  child: RadioGroup<SexForCalculation>(
-                    groupValue: _selectedSex,
-                    onChanged: (value) {
-                      if (_isSaving) {
-                        return;
-                      }
-                      setState(() {
-                        _selectedSex = value;
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        ...SexForCalculation.values.map(
-                          (item) => RadioListTile<SexForCalculation>(
-                            title: Text(item.label),
-                            value: item,
-                          ),
+      body: AppBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: kEdgeInsetsAll,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'To personalize alcohol safety estimates, please choose the sex used for physiological calculations.',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                IgnorePointer(
+                  ignoring: _isSaving,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: _isSaving ? 0.55 : 1,
+                    child: Theme(
+                      data: Theme.of(
+                        context,
+                      ).copyWith(unselectedWidgetColor: Colors.white),
+                      child: RadioGroup<SexForCalculation>(
+                        groupValue: _selectedSex,
+                        onChanged: (value) {
+                          if (_isSaving) {
+                            return;
+                          }
+                          setState(() {
+                            _selectedSex = value;
+                          });
+                        },
+                        child: Column(
+                          children: [
+                            ...SexForCalculation.values.map(
+                              (item) => RadioListTile<SexForCalculation>(
+                                activeColor: Colors.white,
+                                title: Text(
+                                  item.label,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                value: item,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              // ElevatedButton(
-              //   onPressed: _isSaving ? null : _saveAndContinue,
-              //   child: Text(
-              //     _isSaving
-              //         ? 'Saving...'
-              //         : (_isOpenedFromSettings ? 'Save' : 'Continue'),
-              //   ),
-              // ),
-              AppButton(
-                title: _isSaving
-                    ? 'Saving...'
-                    : (_isOpenedFromSettings ? 'Save' : 'Continue'),
-                color: kPrimaryColor,
-                onPressed: () {
-                  if (_isSaving) {
-                    return;
-                  }
-                  _saveAndContinue();
-                },
-              ),
-            ],
+                const Spacer(),
+                AppButton(
+                  title: _isSaving
+                      ? 'Saving...'
+                      : (_isOpenedFromSettings ? 'Save' : 'Continue'),
+                  color: kPrimaryColor,
+                  onPressed: () {
+                    if (_isSaving) {
+                      return;
+                    }
+                    _saveAndContinue();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
