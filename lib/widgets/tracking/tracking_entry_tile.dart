@@ -18,18 +18,24 @@ class TrackingEntryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
+      color: Colors.white.withValues(alpha: 0.2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: const Icon(Icons.local_bar),
-            title: Text(drinkName),
+            leading: const Icon(Icons.local_bar, size: 24, color: Colors.white),
+            title: Text(drinkName, style: const TextStyle(color: Colors.white)),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.edit, size: 20),
+                  icon: Icon(
+                    Icons.edit,
+                    size: 24,
+                    color: Colors.white.withValues(alpha: kTextOpacity),
+                  ),
                   tooltip: 'Edit',
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints.tightFor(
@@ -39,9 +45,13 @@ class TrackingEntryTile extends StatelessWidget {
                   visualDensity: VisualDensity.compact,
                   onPressed: onEdit,
                 ),
-                const SizedBox(width: 4),
+                // const SizedBox(width: 4),
                 IconButton(
-                  icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                  icon: Icon(
+                    Icons.delete,
+                    size: 24,
+                    color: Colors.red.withValues(alpha: kTextOpacity),
+                  ),
                   tooltip: 'Delete',
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints.tightFor(
@@ -58,7 +68,9 @@ class TrackingEntryTile extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: Text(
               subtitle,
-              style: const TextStyle(color: kSecondaryTextColor),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: kTextOpacity),
+              ),
             ),
           ),
         ],

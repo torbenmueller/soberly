@@ -8,6 +8,7 @@ import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/soberly_app_bar.dart';
+import 'package:soberly/widgets/profile/sex_for_calculation_dropdown.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -25,6 +26,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   bool _isSaving = false;
   bool _isOpenedFromSettings = false;
   bool _didLoadExisting = false;
+  String _dailyGoal = '';
 
   @override
   void didChangeDependencies() {
@@ -114,75 +116,207 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    await _auth.signOut();
+    if (!mounted) return;
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      LoginScreen.id,
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SoberlyAppBar(
         title: Text(_isOpenedFromSettings ? 'Edit Profile' : 'Profile Setup'),
+        actions: <Widget>[
+          IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
+        ],
       ),
       body: AppBackground(
         child: SafeArea(
-          child: Padding(
-            padding: kEdgeInsetsAll,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'To personalize alcohol safety estimates, please choose the sex used for physiological calculations.',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: kEdgeInsetsAll,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - kEdgeInsetsAll.vertical,
                 ),
-                const SizedBox(height: 16),
-                IgnorePointer(
-                  ignoring: _isSaving,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 150),
-                    opacity: _isSaving ? 0.55 : 1,
-                    child: Theme(
-                      data: Theme.of(
-                        context,
-                      ).copyWith(unselectedWidgetColor: Colors.white),
-                      child: RadioGroup<SexForCalculation>(
-                        groupValue: _selectedSex,
-                        onChanged: (value) {
-                          if (_isSaving) {
-                            return;
-                          }
-                          setState(() {
-                            _selectedSex = value;
-                          });
-                        },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Card(
+                      margin: EdgeInsets.zero,
+                      elevation: 2,
+                      color: Colors.white.withValues(alpha: 0.2),
+                      child: Padding(
+                        padding: kEdgeInsetsAll,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            ...SexForCalculation.values.map(
-                              (item) => RadioListTile<SexForCalculation>(
-                                activeColor: Colors.white,
-                                title: Text(
-                                  item.label,
-                                  style: const TextStyle(color: Colors.white),
+                            const Text(
+                              'Personal Information',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            RichText(
+                              text: TextSpan(
+                                style: const TextStyle(fontSize: 16),
+                                children: [
+                                  const TextSpan(
+                                    text: 'Email: ',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  TextSpan(
+                                    text: _auth.currentUser?.email ?? 'Unknown',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: kTextOpacity,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Sex for Calculation',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(
+                                  alpha: kTextOpacity,
                                 ),
-                                value: item,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            SexForCalculationDropdown(
+                              selectedSex: _selectedSex,
+                              isSaving: _isSaving,
+                              onSelected: (value) =>
+                                  setState(() => _selectedSex = value),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Card(
+                      margin: EdgeInsets.zero,
+                      elevation: 2,
+                      color: Colors.white.withValues(alpha: 0.2),
+                      child: Padding(
+                        padding: kEdgeInsetsAll,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Daily Goal',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Daily goal in grams (optional)',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white.withValues(
+                                  alpha: kTextOpacity,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            TextField(
+                              keyboardType: TextInputType.text,
+                              textAlign: TextAlign.center,
+                              onChanged: (value) => _dailyGoal = value,
+                              decoration: kTextFieldDecoration.copyWith(
+                                fillColor: Colors.white,
+                                filled: true,
+                                hintText: 'Enter your daily goal in grams',
+                                border: buildProfileOutlineInputBorder(
+                                  color: Colors.blueAccent,
+                                ),
+                                enabledBorder: buildProfileOutlineInputBorder(
+                                  color: Colors.blueAccent,
+                                ),
+                                focusedBorder: buildProfileOutlineInputBorder(
+                                  color: Colors.blueAccent,
+                                  width: 2.0,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    AppButton(
+                      title: _isSaving
+                          ? 'Saving...'
+                          : (_isOpenedFromSettings ? 'Save' : 'Continue'),
+                      color: kPrimaryColor,
+                      onPressed: () {
+                        if (_isSaving) {
+                          return;
+                        }
+                        _saveAndContinue();
+                      },
+                    ),
+                    if (_isOpenedFromSettings) ...[
+                      const SizedBox(height: 16),
+                      Card(
+                        margin: EdgeInsets.zero,
+                        elevation: 2,
+                        color: Colors.white.withValues(alpha: 0.2),
+                        child: Padding(
+                          padding: kEdgeInsetsAll,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Log Out from your account',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Log Out from your account.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white.withValues(
+                                    alpha: kTextOpacity,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              AppButton(
+                                title: 'Log Out',
+                                color: const Color(0xFF000000),
+                                textColor: Colors.white,
+                                onPressed: _logout,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                const Spacer(),
-                AppButton(
-                  title: _isSaving
-                      ? 'Saving...'
-                      : (_isOpenedFromSettings ? 'Save' : 'Continue'),
-                  color: kPrimaryColor,
-                  onPressed: () {
-                    if (_isSaving) {
-                      return;
-                    }
-                    _saveAndContinue();
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         ),

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/components/app_button.dart';
+import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/app_background.dart';
 
@@ -122,6 +123,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       });
                     }
                   },
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Color(0xff52A8F2),
+                    textStyle: const TextStyle(
+                      fontSize: 18.0,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, RegistrationScreen.id),
+                  child: const Text('Create a new account'),
                 ),
               ],
             ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/widgets/tracking/tracking_entry_tile.dart';
 
+import '../../constants.dart';
+
 class TrackingEntriesSection extends StatelessWidget {
   final Stream<List<TrackingEntry>> stream;
   final ValueChanged<TrackingEntry> onEdit;
@@ -31,20 +33,25 @@ class TrackingEntriesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const Text(
-          'Your entries',
+          'Today\'s Entries',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),
-        const SizedBox(height: 8),
         Expanded(
           child: StreamBuilder<List<TrackingEntry>>(
             stream: stream,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return const Center(child: Text('Could not load entries.'));
+                return Text(
+                  'Could not load entries.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withValues(alpha: kTextOpacity),
+                  ),
+                );
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -52,32 +59,39 @@ class TrackingEntriesSection extends StatelessWidget {
 
               final entries = snapshot.data ?? const <TrackingEntry>[];
               if (entries.isEmpty) {
-                return const Center(
-                  child: Text('No entries yet. Tap + to add your first drink.'),
+                return Text(
+                  'No entries yet. Tap + to add your first drink.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white.withValues(alpha: kTextOpacity),
+                  ),
                 );
               }
 
-              return ListView.separated(
-                itemCount: entries.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final entry = entries[index];
-                  final drinkName = entry.drinkName.isEmpty
-                      ? '-'
-                      : entry.drinkName;
-                  final pureAlcohol =
-                      entry.amount * (entry.alcoholPercent / 100) * 0.789;
-                  final subtitle =
-                      '${entry.alcoholPercent.toStringAsFixed(1)}%  •  ${entry.amount}ml  • ${pureAlcohol.toStringAsFixed(1)}g'
-                      '\n${_formatTimestamp(entry.createdAt)}';
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ListView.separated(
+                  itemCount: entries.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final entry = entries[index];
+                    final drinkName = entry.drinkName.isEmpty
+                        ? '-'
+                        : entry.drinkName;
+                    final pureAlcohol =
+                        entry.amount * (entry.alcoholPercent / 100) * 0.789;
+                    final subtitle =
+                        '${entry.alcoholPercent.toStringAsFixed(1)}%  •  ${entry.amount}ml  • ${pureAlcohol.toStringAsFixed(1)}g'
+                        '\n${_formatTimestamp(entry.createdAt)}';
 
-                  return TrackingEntryTile(
-                    drinkName: drinkName,
-                    subtitle: subtitle,
-                    onEdit: () => onEdit(entry),
-                    onDelete: entry.id == null ? null : () => onDelete(entry),
-                  );
-                },
+                    return TrackingEntryTile(
+                      drinkName: drinkName,
+                      subtitle: subtitle,
+                      onEdit: () => onEdit(entry),
+                      onDelete: entry.id == null ? null : () => onDelete(entry),
+                    );
+                  },
+                ),
               );
             },
           ),

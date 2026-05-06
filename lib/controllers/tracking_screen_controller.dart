@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
-import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/services/tracking_repository.dart';
 import 'package:soberly/utils/auth_guard.dart';
@@ -55,6 +54,19 @@ class TrackingScreenController extends ChangeNotifier {
     final user = _auth.currentUser;
     if (user == null) return const Stream.empty();
     return _trackingRepository.streamEntries(uid: user.uid);
+  }
+
+  /// Stream of tracking entries filtered to today's date only.
+  Stream<List<TrackingEntry>> get todayEntriesStream {
+    return entriesStream.map((entries) {
+      final today = DateTime.now().toLocal();
+      return entries.where((entry) {
+        final createdAt = entry.createdAt;
+        if (createdAt == null) return false;
+        final localEntryTime = createdAt.toDate().toLocal();
+        return _isSameLocalDay(localEntryTime, today);
+      }).toList();
+    });
   }
 
   bool _isSameLocalDay(DateTime a, DateTime b) {
@@ -225,18 +237,6 @@ class TrackingScreenController extends ChangeNotifier {
         ),
       );
     }
-  }
-
-  // ── Sign out ─────────────────────────────────────────────────────────────
-
-  Future<void> signOut(BuildContext context) async {
-    await _auth.signOut();
-    if (!context.mounted) return;
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      LoginScreen.id,
-      (route) => false,
-    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────

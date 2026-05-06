@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class AppButton extends StatelessWidget {
   final String title;
   final Color color;
+  final Color textColor;
   final VoidCallback onPressed;
 
   const AppButton({
     super.key,
     required this.title,
     required this.color,
+    this.textColor = Colors.black,
     required this.onPressed,
   });
 
@@ -26,7 +28,7 @@ class AppButton extends StatelessWidget {
           height: 42.0,
           child: Text(
             title,
-            style: TextStyle(fontSize: 20.0, color: Colors.black),
+            style: TextStyle(fontSize: 20.0, color: textColor),
           ),
         ),
       ),

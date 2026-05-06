@@ -3,6 +3,8 @@ import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/controllers/tracking_screen_controller.dart';
 import 'package:soberly/widgets/tracking/add_new_drink.dart';
+import 'package:soberly/widgets/tracking/daily_limit_text.dart';
+import 'package:soberly/widgets/tracking/health_status_card.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
@@ -18,7 +20,7 @@ class TrackingScreen extends StatefulWidget {
 
 class _TrackingScreenState extends State<TrackingScreen> {
   late final TrackingScreenController _controller;
-  late final Future<double> _dailyLimitFuture;
+  late Future<double> _dailyLimitFuture;
 
   @override
   void initState() {
@@ -27,6 +29,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
     _controller.redirectIfUnauthenticated(context);
     _controller.redirectIfProfileIncomplete(context);
     _dailyLimitFuture = _controller.getDailyLimitGrams();
+  }
+
+  void _refreshDailyLimit() {
+    setState(() {
+      _dailyLimitFuture = _controller.getDailyLimitGrams();
+    });
   }
 
   @override
@@ -69,119 +77,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
     );
   }
 
-  String _formatGrams(double grams) {
-    return grams.toStringAsFixed(1);
-  }
-
-  Widget _buildHealthStatusCard(double dailyLimit) {
-    return StreamBuilder<List<TrackingEntry>>(
-      stream: _controller.entriesStream,
-      builder: (context, snapshot) {
-        final entries = snapshot.data ?? const <TrackingEntry>[];
-        final todayGrams = _controller.computeTodayAlcoholGrams(entries);
-        final remaining = dailyLimit - todayGrams;
-        final isWithinLimit = remaining >= 0;
-
-        String riskLevel;
-        String riskText;
-        Color riskColor;
-        Color riskBackgroundColor;
-
-        if (todayGrams <= dailyLimit) {
-          riskLevel = 'Low';
-          riskText = 'Within recommended limits';
-          riskColor = Colors.green.shade800;
-          riskBackgroundColor = Colors.green.shade50;
-        } else if (todayGrams <= dailyLimit * 2) {
-          riskLevel = 'Moderate';
-          riskText = 'Above recommended intake';
-          riskColor = Colors.orange.shade800;
-          riskBackgroundColor = Colors.orange.shade50;
-        } else {
-          riskLevel = 'High';
-          riskText = 'Significantly above recommended intake';
-          riskColor = Colors.red.shade800;
-          riskBackgroundColor = Colors.red.shade50;
-        }
-
-        return Card(
-          elevation: 2,
-          color: riskBackgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: kEdgeInsetsAll,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.favorite, size: 22),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Risk Level',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      riskLevel,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: riskColor,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(riskText, style: const TextStyle(fontSize: 16)),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Today: ${_formatGrams(todayGrams)} g alcohol',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: riskColor,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '${isWithinLimit ? '-' : '+'} ${_formatGrams(remaining.abs())} g',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDailyLimitText(double dailyLimit) {
-    return Text(
-      'Your daily limit is ${_formatGrams(dailyLimit)} g alcohol.',
-      style: TextStyle(fontSize: 16, color: Colors.white),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,17 +84,19 @@ class _TrackingScreenState extends State<TrackingScreen> {
         automaticallyImplyLeading: false,
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.manage_accounts),
+            icon: const Icon(Icons.person),
             tooltip: 'Edit profile',
-            onPressed: () => Navigator.pushNamed(
-              context,
-              ProfileSetupScreen.id,
-              arguments: true,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _controller.signOut(context),
+            onPressed: () async {
+              final updated = await Navigator.pushNamed(
+                context,
+                ProfileSetupScreen.id,
+                arguments: true,
+              );
+              if (!mounted) return;
+              if (updated == true) {
+                _refreshDailyLimit();
+              }
+            },
           ),
         ],
         centerTitle: true,
@@ -226,13 +123,45 @@ class _TrackingScreenState extends State<TrackingScreen> {
               builder: (context, snapshot) {
                 final dailyLimit = snapshot.data ?? 0.0;
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHealthStatusCard(dailyLimit),
-                    _buildDailyLimitText(dailyLimit),
-                    const SizedBox(height: 16),
+                    const Text(
+                      'Track Drinks',
+                      style: TextStyle(
+                        fontSize: kFontSizeLarge,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'Log what you\'re drinking',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: kTextOpacity),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    StreamBuilder<List<TrackingEntry>>(
+                      stream: _controller.entriesStream,
+                      builder: (context, snapshot) {
+                        final entries =
+                            snapshot.data ?? const <TrackingEntry>[];
+                        final todayGrams = _controller.computeTodayAlcoholGrams(
+                          entries,
+                        );
+
+                        return HealthStatusCard(
+                          dailyLimit: dailyLimit,
+                          todayGrams: todayGrams,
+                        );
+                      },
+                    ),
+                    Center(child: DailyLimitText(dailyLimit: dailyLimit)),
+                    const SizedBox(height: 20),
                     Expanded(
                       child: TrackingEntriesSection(
-                        stream: _controller.entriesStream,
+                        stream: _controller.todayEntriesStream,
                         onEdit: (entry) =>
                             _controller.editEntry(context, entry),
                         onDelete: (entry) {

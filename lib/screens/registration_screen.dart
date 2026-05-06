@@ -5,6 +5,7 @@ import 'package:soberly/constants.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/app_background.dart';
+import 'package:soberly/screens/login_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = 'registration_screen';
@@ -97,6 +98,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       });
                     }
                   },
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Color(0xff52A8F2),
+                    textStyle: const TextStyle(
+                      fontSize: 18.0,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pushNamed(context, LoginScreen.id),
+                  child: const Text('I already have an account'),
                 ),
               ],
             ),

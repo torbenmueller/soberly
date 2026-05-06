@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:auto_hyphenating_text/auto_hyphenating_text.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/screens/registration_screen.dart';
@@ -11,6 +12,7 @@ import 'package:soberly/constants.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await initHyphenation();
   runApp(const Soberly());
 }
 
@@ -33,12 +35,12 @@ class Soberly extends StatelessWidget {
         ),
         appBarTheme: const AppBarTheme(
           foregroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.white),
-          actionsIconTheme: IconThemeData(color: Colors.white),
+          iconTheme: IconThemeData(color: Colors.white, size: 24),
+          actionsIconTheme: IconThemeData(color: Colors.white, size: 24),
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 20,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),
