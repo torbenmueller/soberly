@@ -7,8 +7,8 @@ import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
-import 'package:soberly/widgets/soberly_app_bar.dart';
 import 'package:soberly/widgets/profile/sex_for_calculation_dropdown.dart';
+import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -126,14 +126,21 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
+  void _goToTrackingScreen() {
+    if (_isOpenedFromSettings) {
+      Navigator.pop(context, true);
+      return;
+    }
+    Navigator.pushReplacementNamed(context, TrackingScreen.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SoberlyAppBar(
-        title: Text(_isOpenedFromSettings ? 'Edit Profile' : 'Profile Setup'),
-        actions: <Widget>[
-          IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
-        ],
+      bottomNavigationBar: TrackingBottomActionBar(
+        onTrackingPressed: _goToTrackingScreen,
+        onProfilePressed: () {},
+        isProfileSelected: true,
       ),
       body: AppBackground(
         child: SafeArea(
@@ -147,6 +154,23 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Text(
+                      _isOpenedFromSettings ? 'Edit Profile' : 'Profile Setup',
+                      style: const TextStyle(
+                        fontSize: kFontSizeLarge,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      'Change and edit your profile information',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: kTextOpacity),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     Card(
                       margin: EdgeInsets.zero,
                       elevation: 2,
@@ -294,7 +318,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Log Out from your account.',
+                                'Log out from your account',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.white.withValues(

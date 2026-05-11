@@ -3,12 +3,12 @@ import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/controllers/tracking_screen_controller.dart';
 import 'package:soberly/widgets/tracking/add_new_drink.dart';
+import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
 import 'package:soberly/widgets/tracking/daily_limit_text.dart';
 import 'package:soberly/widgets/tracking/health_status_card.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
-import 'package:soberly/widgets/soberly_app_bar.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -80,31 +80,22 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: SoberlyAppBar(
-        automaticallyImplyLeading: false,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.person),
-            tooltip: 'Edit profile',
-            onPressed: () async {
-              final updated = await Navigator.pushNamed(
-                context,
-                ProfileSetupScreen.id,
-                arguments: true,
-              );
-              if (!mounted) return;
-              if (updated == true) {
-                _refreshDailyLimit();
-              }
-            },
-          ),
-        ],
-        centerTitle: true,
-        title: SizedBox(
-          height: 40.0,
-          child: Image.asset('images/soberly_logo.png'),
-        ),
+      bottomNavigationBar: TrackingBottomActionBar(
+        onTrackingPressed: () {},
+        onProfilePressed: () async {
+          final updated = await Navigator.pushNamed(
+            context,
+            ProfileSetupScreen.id,
+            arguments: true,
+          );
+          if (!mounted) return;
+          if (updated == true) {
+            _refreshDailyLimit();
+          }
+        },
+        isTrackingSelected: true,
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: SizedBox.square(
         dimension: 60,
         child: FloatingActionButton(

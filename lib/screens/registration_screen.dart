@@ -20,6 +20,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String email = '';
   String password = '';
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ),
                 SizedBox(height: 24.0),
                 TextField(
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   textAlign: TextAlign.center,
                   onChanged: (value) {
                     password = value;
@@ -67,6 +68,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     fillColor: Colors.white,
                     filled: true,
                     hintText: 'Enter your password',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
+                    ),
                   ),
                 ),
                 SizedBox(height: 24.0),
