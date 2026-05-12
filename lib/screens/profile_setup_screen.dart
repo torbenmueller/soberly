@@ -9,6 +9,7 @@ import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/profile/sex_for_calculation_dropdown.dart';
 import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
+import 'package:soberly/widgets/app_page_header.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -154,23 +155,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      _isOpenedFromSettings ? 'Edit Profile' : 'Profile Setup',
-                      style: const TextStyle(
-                        fontSize: kFontSizeLarge,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                    AppPageHeader(
+                      title: _isOpenedFromSettings
+                          ? 'Edit Profile'
+                          : 'Profile Setup',
+                      subtitle: 'Change and edit your profile information',
                     ),
-                    Text(
-                      'Change and edit your profile information',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: kTextOpacity),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                     Card(
                       margin: EdgeInsets.zero,
                       elevation: 2,

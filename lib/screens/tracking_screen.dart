@@ -9,6 +9,7 @@ import 'package:soberly/widgets/tracking/health_status_card.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
+import 'package:soberly/widgets/app_page_header.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -116,28 +117,23 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Track Drinks',
-                      style: TextStyle(
-                        fontSize: kFontSizeLarge,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                    const AppPageHeader(
+                      title: 'Track Drinks',
+                      subtitle: 'Log what you\'re drinking',
                     ),
-                    Text(
-                      'Log what you\'re drinking',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: kTextOpacity),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                     StreamBuilder<List<TrackingEntry>>(
                       stream: _controller.entriesStream,
                       builder: (context, snapshot) {
-                        final entries =
-                            snapshot.data ?? const <TrackingEntry>[];
+                        if (!snapshot.hasData ||
+                            snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 132,
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        final entries = snapshot.data!;
                         final todayGrams = _controller.computeTodayAlcoholGrams(
                           entries,
                         );

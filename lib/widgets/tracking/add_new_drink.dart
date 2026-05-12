@@ -98,12 +98,7 @@ class AddNewDrink extends StatelessWidget {
             AppButton(
               title: isSubmitting ? 'Saving...' : 'Add Drink',
               color: kPrimaryColor,
-              onPressed: () async {
-                if (isSubmitting) {
-                  return;
-                }
-                await onSubmit();
-              },
+              onPressed: isSubmitting ? null : onSubmit,
             ),
           ],
         ),

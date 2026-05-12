@@ -53,11 +53,12 @@ class TrackingEntriesSection extends StatelessWidget {
                   ),
                 );
               }
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (!snapshot.hasData ||
+                  snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              final entries = snapshot.data ?? const <TrackingEntry>[];
+              final entries = snapshot.data!;
               if (entries.isEmpty) {
                 return Text(
                   'No entries yet. Tap + to add your first drink.',

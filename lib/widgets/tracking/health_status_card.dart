@@ -15,11 +15,12 @@ class HealthStatusCard extends StatelessWidget {
     return grams.toStringAsFixed(1);
   }
 
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final remaining = dailyLimit - todayGrams;
-    final isWithinLimit = remaining >= 0;
-
     String riskLevel;
     String riskText;
     Color riskColor;
@@ -61,6 +62,52 @@ class HealthStatusCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                const Text(
+                  'Today',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _formatDate(DateTime.now()),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withValues(alpha: kTextOpacity),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: riskColor,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '${_formatGrams(todayGrams)} g',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // const SizedBox(height: 10),
+            // Text(
+            //   '${_formatGrams(todayGrams)} g alcohol',
+            //   style: const TextStyle(fontSize: 16, color: Colors.white),
+            // ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
                 const Icon(Icons.favorite, size: 22, color: Colors.white),
                 const SizedBox(width: 8),
                 const Text(
@@ -85,35 +132,6 @@ class HealthStatusCard extends StatelessWidget {
             Text(
               riskText,
               style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Today: ${_formatGrams(todayGrams)} g alcohol',
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: riskColor,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    '${isWithinLimit ? '-' : '+'} ${_formatGrams(remaining.abs())} g',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
