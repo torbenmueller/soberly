@@ -69,6 +69,33 @@ class TrackingScreenController extends ChangeNotifier {
     });
   }
 
+  Future<void> prefillFromMostRecentEntry() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    TrackingEntry? recentEntry;
+    try {
+      recentEntry = await _trackingRepository.getMostRecentEntry(uid: user.uid);
+    } on FirebaseException {
+      return;
+    }
+    if (recentEntry == null) {
+      return;
+    }
+
+    drinkNameController.text = recentEntry.drinkName;
+    alcoholController.text = _formatAlcoholPercent(recentEntry.alcoholPercent);
+    amountController.text = recentEntry.amount.toString();
+  }
+
+  String _formatAlcoholPercent(double value) {
+    return value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toString();
+  }
+
   bool _isSameLocalDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }

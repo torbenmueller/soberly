@@ -25,6 +25,18 @@ class TrackingRepository {
         );
   }
 
+  Future<TrackingEntry?> getMostRecentEntry({required String uid}) async {
+    final snapshot = await _entriesCollection(
+      uid,
+    ).orderBy('createdAt', descending: true).limit(1).get();
+
+    if (snapshot.docs.isEmpty) {
+      return null;
+    }
+
+    return TrackingEntry.fromDocument(snapshot.docs.first);
+  }
+
   Future<void> addEntry({required String uid, required TrackingEntry entry}) {
     return _entriesCollection(uid).add(entry.toCreateMap());
   }

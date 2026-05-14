@@ -153,6 +153,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           child: LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
               padding: kEdgeInsetsAll,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: constraints.maxHeight - kEdgeInsetsAll.vertical,

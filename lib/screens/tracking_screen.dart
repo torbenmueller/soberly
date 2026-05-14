@@ -46,7 +46,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
     super.dispose();
   }
 
-  void _openAddDrinkSheet() {
+  Future<void> _openAddDrinkSheet() async {
+    await _controller.prefillFromMostRecentEntry();
+    if (!mounted) {
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

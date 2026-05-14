@@ -30,101 +30,112 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         child: LoadingOverlay(
           color: Colors.black.withValues(alpha: 0.5),
           isLoading: _isLoading,
-          child: Padding(
-            padding: kEdgeInsetsSymmetricHorizontal,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Hero(
-                  tag: 'soberly_logo',
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.center,
-                    child: SvgPicture.asset(
-                      'images/soberly_logo.svg',
-                      width: 280,
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: kEdgeInsetsSymmetricHorizontal.left,
+                right: kEdgeInsetsSymmetricHorizontal.right,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Hero(
+                      tag: 'soberly_logo',
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset(
+                          'images/soberly_logo.svg',
+                          width: 280,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                SizedBox(height: 48.0),
-                TextField(
-                  keyboardType: TextInputType.emailAddress,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    email = value;
-                  },
-                  decoration: kTextFieldDecoration.copyWith(
-                    fillColor: Colors.white,
-                    filled: true,
-                    hintText: 'Enter your email',
-                  ),
-                ),
-                SizedBox(height: 24.0),
-                TextField(
-                  obscureText: _obscurePassword,
-                  textAlign: TextAlign.center,
-                  onChanged: (value) {
-                    password = value;
-                  },
-                  decoration: kTextFieldDecoration.copyWith(
-                    fillColor: Colors.white,
-                    filled: true,
-                    hintText: 'Enter your password',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.grey,
+                    SizedBox(height: 48.0),
+                    TextField(
+                      keyboardType: TextInputType.emailAddress,
+                      textAlign: TextAlign.center,
+                      onChanged: (value) {
+                        email = value;
+                      },
+                      decoration: kTextFieldDecoration.copyWith(
+                        fillColor: Colors.white,
+                        filled: true,
+                        hintText: 'Enter your email',
+                      ),
+                    ),
+                    SizedBox(height: 24.0),
+                    TextField(
+                      obscureText: _obscurePassword,
+                      textAlign: TextAlign.center,
+                      onChanged: (value) {
+                        password = value;
+                      },
+                      decoration: kTextFieldDecoration.copyWith(
+                        fillColor: Colors.white,
+                        filled: true,
+                        hintText: 'Enter your password',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24.0),
+                    AppButton(
+                      title: 'Create account',
+                      color: Color(0xff52A8F2),
+                      onPressed: () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        try {
+                          final UserCredential userCredential = await _auth
+                              .createUserWithEmailAndPassword(
+                                email: email,
+                                password: password,
+                              );
+                          if (!context.mounted) {
+                            return;
+                          }
+                          if (userCredential.user != null) {
+                            await navigateAfterAuth(context, auth: _auth);
+                          }
+                        } catch (e) {
+                          debugPrint('$e');
+                        }
+                        if (context.mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        foregroundColor: Color(0xff52A8F2),
+                        textStyle: const TextStyle(
+                          fontSize: 18.0,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                       onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                          Navigator.pushNamed(context, LoginScreen.id),
+                      child: const Text('I already have an account'),
                     ),
-                  ),
+                  ],
                 ),
-                SizedBox(height: 24.0),
-                AppButton(
-                  title: 'Create account',
-                  color: Color(0xff52A8F2),
-                  onPressed: () async {
-                    setState(() {
-                      _isLoading = true;
-                    });
-                    try {
-                      final UserCredential userCredential = await _auth
-                          .createUserWithEmailAndPassword(
-                            email: email,
-                            password: password,
-                          );
-                      if (!context.mounted) {
-                        return;
-                      }
-                      if (userCredential.user != null) {
-                        await navigateAfterAuth(context, auth: _auth);
-                      }
-                    } catch (e) {
-                      debugPrint('$e');
-                    }
-                    if (context.mounted) {
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
-                  },
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: Color(0xff52A8F2),
-                    textStyle: const TextStyle(
-                      fontSize: 18.0,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                  onPressed: () => Navigator.pushNamed(context, LoginScreen.id),
-                  child: const Text('I already have an account'),
-                ),
-              ],
+              ),
             ),
           ),
         ),
