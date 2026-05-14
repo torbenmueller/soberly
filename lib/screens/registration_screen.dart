@@ -6,6 +6,7 @@ import 'package:soberly/components/app_button.dart';
 import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/screens/login_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static const String id = 'registration_screen';
@@ -35,12 +36,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                Flexible(
-                  child: Hero(
-                    tag: 'soberly_logo',
-                    child: SizedBox(
-                      height: 200.0,
-                      child: Image.asset('images/soberly_logo.png'),
+                Hero(
+                  tag: 'soberly_logo',
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: SvgPicture.asset(
+                      'images/soberly_logo.svg',
+                      width: 280,
                     ),
                   ),
                 ),

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/constants.dart';
 
+enum TrackingBottomActionBarTab { tracking, calendar, statistics, profile }
+
 class TrackingBottomActionBar extends StatelessWidget {
   final VoidCallback? onTrackingPressed;
   final VoidCallback? onCalendarPressed;
   final VoidCallback? onStatisticsPressed;
   final VoidCallback onProfilePressed;
-  final bool isTrackingSelected;
-  final bool isProfileSelected;
+  final TrackingBottomActionBarTab selectedTab;
 
   const TrackingBottomActionBar({
     super.key,
@@ -15,8 +16,7 @@ class TrackingBottomActionBar extends StatelessWidget {
     this.onCalendarPressed,
     this.onStatisticsPressed,
     required this.onProfilePressed,
-    this.isTrackingSelected = false,
-    this.isProfileSelected = false,
+    required this.selectedTab,
   });
 
   @override
@@ -38,26 +38,40 @@ class TrackingBottomActionBar extends StatelessWidget {
                 onPressed: onTrackingPressed,
                 icon: Icon(
                   Icons.local_bar,
-                  color: isTrackingSelected ? kPrimaryColor : Colors.white,
+                  color: selectedTab == TrackingBottomActionBarTab.tracking
+                      ? kPrimaryColor
+                      : Colors.white,
                 ),
               ),
               IconButton(
-                tooltip: 'Calendar coming soon',
+                tooltip: 'Calendar',
                 onPressed: onCalendarPressed,
-                icon: const Icon(Icons.calendar_month, color: Colors.white),
+                icon: Icon(
+                  Icons.calendar_month,
+                  color: selectedTab == TrackingBottomActionBarTab.calendar
+                      ? kPrimaryColor
+                      : Colors.white,
+                ),
               ),
               const SizedBox(width: 56),
               IconButton(
-                tooltip: 'Statistics coming soon',
+                tooltip: 'Statistics',
                 onPressed: onStatisticsPressed,
-                icon: const Icon(Icons.query_stats, color: Colors.white),
+                icon: Icon(
+                  Icons.query_stats,
+                  color: selectedTab == TrackingBottomActionBarTab.statistics
+                      ? kPrimaryColor
+                      : Colors.white,
+                ),
               ),
               IconButton(
                 tooltip: 'Edit profile',
                 onPressed: onProfilePressed,
                 icon: Icon(
                   Icons.person,
-                  color: isProfileSelected ? kPrimaryColor : Colors.white,
+                  color: selectedTab == TrackingBottomActionBarTab.profile
+                      ? kPrimaryColor
+                      : Colors.white,
                 ),
               ),
             ],

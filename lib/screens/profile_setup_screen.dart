@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:soberly/models/sex_for_calculation.dart';
+import 'package:soberly/screens/calendar_screen.dart';
 import 'package:soberly/screens/login_screen.dart';
+import 'package:soberly/screens/statistics_screen.dart';
 import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/components/app_button.dart';
@@ -27,7 +29,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   bool _isSaving = false;
   bool _isOpenedFromSettings = false;
   bool _didLoadExisting = false;
-  String _dailyGoal = '';
 
   @override
   void didChangeDependencies() {
@@ -140,8 +141,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return Scaffold(
       bottomNavigationBar: TrackingBottomActionBar(
         onTrackingPressed: _goToTrackingScreen,
+        onCalendarPressed: () =>
+            Navigator.pushReplacementNamed(context, CalendarScreen.id),
+        onStatisticsPressed: () =>
+            Navigator.pushReplacementNamed(context, StatisticsScreen.id),
         onProfilePressed: () {},
-        isProfileSelected: true,
+        selectedTab: TrackingBottomActionBarTab.profile,
       ),
       body: AppBackground(
         child: SafeArea(
@@ -253,7 +258,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                             TextField(
                               keyboardType: TextInputType.text,
                               textAlign: TextAlign.center,
-                              onChanged: (value) => _dailyGoal = value,
                               decoration: kTextFieldDecoration.copyWith(
                                 fillColor: Colors.white,
                                 filled: true,
@@ -304,16 +308,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Log out from your account',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white.withValues(
-                                    alpha: kTextOpacity,
-                                  ),
                                 ),
                               ),
                               const SizedBox(height: 16),

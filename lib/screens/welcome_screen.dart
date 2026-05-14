@@ -6,6 +6,7 @@ import 'package:soberly/screens/registration_screen.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/app_background.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const String id = 'welcome_screen';
@@ -72,12 +73,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           children: <Widget>[
             Hero(
               tag: 'soberly_logo',
-              child: SizedBox(
-                child: Image.asset(
-                  'images/soberly_logo.png',
-                  width: double.infinity,
-                  fit: BoxFit.contain,
-                ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: SvgPicture.asset('images/soberly_logo.svg', width: 300),
               ),
             ),
             const SizedBox(height: 24.0),

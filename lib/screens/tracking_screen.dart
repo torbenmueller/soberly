@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
+import 'package:soberly/screens/calendar_screen.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
+import 'package:soberly/screens/statistics_screen.dart';
 import 'package:soberly/controllers/tracking_screen_controller.dart';
 import 'package:soberly/widgets/tracking/add_new_drink.dart';
 import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
@@ -83,6 +85,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
     return Scaffold(
       bottomNavigationBar: TrackingBottomActionBar(
         onTrackingPressed: () {},
+        onCalendarPressed: () =>
+            Navigator.pushReplacementNamed(context, CalendarScreen.id),
+        onStatisticsPressed: () =>
+            Navigator.pushReplacementNamed(context, StatisticsScreen.id),
         onProfilePressed: () async {
           final updated = await Navigator.pushNamed(
             context,
@@ -94,7 +100,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
             _refreshDailyLimit();
           }
         },
-        isTrackingSelected: true,
+        selectedTab: TrackingBottomActionBarTab.tracking,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: SizedBox.square(
