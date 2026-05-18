@@ -7,7 +7,7 @@ class TrackingBottomActionBar extends StatelessWidget {
   final VoidCallback? onTrackingPressed;
   final VoidCallback? onCalendarPressed;
   final VoidCallback? onStatisticsPressed;
-  final VoidCallback onProfilePressed;
+  final VoidCallback? onProfilePressed;
   final TrackingBottomActionBarTab selectedTab;
 
   const TrackingBottomActionBar({
@@ -15,7 +15,7 @@ class TrackingBottomActionBar extends StatelessWidget {
     this.onTrackingPressed,
     this.onCalendarPressed,
     this.onStatisticsPressed,
-    required this.onProfilePressed,
+    this.onProfilePressed,
     required this.selectedTab,
   });
 

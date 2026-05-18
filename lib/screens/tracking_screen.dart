@@ -12,6 +12,7 @@ import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/app_page_header.dart';
+import 'package:soberly/utils/navigation_helpers.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -89,11 +90,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: TrackingBottomActionBar(
-        onTrackingPressed: () {},
-        onCalendarPressed: () =>
-            Navigator.pushReplacementNamed(context, CalendarScreen.id),
-        onStatisticsPressed: () =>
-            Navigator.pushReplacementNamed(context, StatisticsScreen.id),
+        onCalendarPressed: () => goToScreen(context, CalendarScreen.id),
+        onStatisticsPressed: () => goToScreen(context, StatisticsScreen.id),
         onProfilePressed: () async {
           final updated = await Navigator.pushNamed(
             context,
@@ -105,6 +103,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
             _refreshDailyLimit();
           }
         },
+        onTrackingPressed: null,
         selectedTab: TrackingBottomActionBarTab.tracking,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

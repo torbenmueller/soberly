@@ -6,6 +6,7 @@ import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/app_page_header.dart';
 import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
+import 'package:soberly/utils/navigation_helpers.dart';
 
 class StatisticsScreen extends StatelessWidget {
   static const String id = 'statistics_screen';
@@ -16,15 +17,14 @@ class StatisticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: TrackingBottomActionBar(
-        onTrackingPressed: () =>
-            Navigator.pushReplacementNamed(context, TrackingScreen.id),
-        onCalendarPressed: () =>
-            Navigator.pushReplacementNamed(context, CalendarScreen.id),
+        onTrackingPressed: () => goToScreen(context, TrackingScreen.id),
+        onCalendarPressed: () => goToScreen(context, CalendarScreen.id),
         onProfilePressed: () => Navigator.pushNamed(
           context,
           ProfileSetupScreen.id,
           arguments: true,
         ),
+        onStatisticsPressed: null,
         selectedTab: TrackingBottomActionBarTab.statistics,
       ),
       body: AppBackground(

@@ -12,6 +12,7 @@ import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/profile/sex_for_calculation_dropdown.dart';
 import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
 import 'package:soberly/widgets/app_page_header.dart';
+import 'package:soberly/utils/navigation_helpers.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -128,20 +129,17 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  void _goToTrackingScreen() {
-    Navigator.pushReplacementNamed(context, TrackingScreen.id);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: TrackingBottomActionBar(
-        onTrackingPressed: _goToTrackingScreen,
+        onTrackingPressed: () =>
+            goToScreen(context, TrackingScreen.id, clearStack: true),
         onCalendarPressed: () =>
-            Navigator.pushReplacementNamed(context, CalendarScreen.id),
+            goToScreen(context, CalendarScreen.id, clearStack: true),
         onStatisticsPressed: () =>
-            Navigator.pushReplacementNamed(context, StatisticsScreen.id),
-        onProfilePressed: () {},
+            goToScreen(context, StatisticsScreen.id, clearStack: true),
+        onProfilePressed: null,
         selectedTab: TrackingBottomActionBarTab.profile,
       ),
       body: AppBackground(
