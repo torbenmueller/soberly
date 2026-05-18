@@ -129,10 +129,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   void _goToTrackingScreen() {
-    if (_isOpenedFromSettings) {
-      Navigator.pop(context, true);
-      return;
-    }
     Navigator.pushReplacementNamed(context, TrackingScreen.id);
   }
 

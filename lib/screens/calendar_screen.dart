@@ -20,7 +20,7 @@ class CalendarScreen extends StatelessWidget {
             Navigator.pushReplacementNamed(context, TrackingScreen.id),
         onStatisticsPressed: () =>
             Navigator.pushReplacementNamed(context, StatisticsScreen.id),
-        onProfilePressed: () => Navigator.pushReplacementNamed(
+        onProfilePressed: () => Navigator.pushNamed(
           context,
           ProfileSetupScreen.id,
           arguments: true,
