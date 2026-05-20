@@ -60,11 +60,12 @@ class TrackingEntriesSection extends StatelessWidget {
 
               final entries = snapshot.data!;
               if (entries.isEmpty) {
-                return Text(
-                  'No entries yet. Tap + to add a drink.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white.withValues(alpha: kTextOpacity),
+                return Expanded(
+                  child: Center(
+                    child: Text(
+                      'No entries yet. Tap + to add a drink.',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 );
               }

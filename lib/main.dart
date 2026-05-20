@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:auto_hyphenating_text/auto_hyphenating_text.dart';
 import 'package:soberly/screens/calendar_screen.dart';
+import 'package:soberly/screens/custom_drinks_screen.dart';
 import 'package:soberly/screens/login_screen.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/screens/registration_screen.dart';
@@ -64,6 +65,9 @@ class Soberly extends StatelessWidget {
           ProfileSetupScreen.id: (context) => const ProfileSetupScreen(),
           StatisticsScreen.id: (context) => buildAuthGuardedScreen(
             authenticatedChild: const StatisticsScreen(),
+          ),
+          CustomDrinksScreen.id: (context) => buildAuthGuardedScreen(
+            authenticatedChild: const CustomDrinksScreen(),
           ),
           TrackingScreen.id: (context) => buildAuthGuardedScreen(
             authenticatedChild: const TrackingScreen(),

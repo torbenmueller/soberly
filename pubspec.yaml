@@ -19,6 +19,7 @@ dependencies:
   cloud_firestore: ^6.2.0
   auto_hyphenating_text: ^0.3.1
   flutter_svg: ^2.2.0
+  table_calendar: ^3.2.0
 
 dev_dependencies:
   flutter_test:

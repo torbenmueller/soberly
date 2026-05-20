@@ -1,18 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:soberly/models/sex_for_calculation.dart';
-import 'package:soberly/screens/calendar_screen.dart';
 import 'package:soberly/screens/login_screen.dart';
-import 'package:soberly/screens/statistics_screen.dart';
 import 'package:soberly/screens/tracking_screen.dart';
 import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/profile/sex_for_calculation_dropdown.dart';
-import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
+import 'package:soberly/widgets/tracking/bottom_action_bar.dart';
 import 'package:soberly/widgets/app_page_header.dart';
-import 'package:soberly/utils/navigation_helpers.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   static const String id = 'profile_setup_screen';
@@ -132,15 +129,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: TrackingBottomActionBar(
-        onTrackingPressed: () =>
-            goToScreen(context, TrackingScreen.id, clearStack: true),
-        onCalendarPressed: () =>
-            goToScreen(context, CalendarScreen.id, clearStack: true),
-        onStatisticsPressed: () =>
-            goToScreen(context, StatisticsScreen.id, clearStack: true),
-        onProfilePressed: null,
-        selectedTab: TrackingBottomActionBarTab.profile,
+      bottomNavigationBar: BottomActionBar(
+        selectedTab: BottomActionBarTab.profile,
+        clearStackOnTabNavigation: true,
       ),
       body: AppBackground(
         child: SafeArea(

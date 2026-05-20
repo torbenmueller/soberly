@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
-import 'package:soberly/widgets/app_page_header.dart';
 import 'package:soberly/widgets/tracking/bottom_action_bar.dart';
+import 'package:soberly/widgets/app_page_header.dart';
 
-class StatisticsScreen extends StatelessWidget {
-  static const String id = 'statistics_screen';
+class CustomDrinksScreen extends StatelessWidget {
+  static const String id = 'custom_drinks_screen';
 
-  const StatisticsScreen({super.key});
+  const CustomDrinksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomActionBar(
-        selectedTab: BottomActionBarTab.statistics,
+        selectedTab: BottomActionBarTab.drinks,
       ),
       body: AppBackground(
         child: SafeArea(
@@ -23,13 +23,13 @@ class StatisticsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AppPageHeader(
-                  title: 'Statistics',
-                  subtitle: 'See trends and insights over time',
+                  title: 'Custom Drinks',
+                  subtitle: 'Create and edit your custom drinks',
                 ),
                 Expanded(
                   child: Center(
                     child: Text(
-                      'Statistics view coming soon.',
+                      'Custom Drinks view coming soon.',
                       style: TextStyle(color: Colors.white, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),

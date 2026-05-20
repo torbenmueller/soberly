@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
-import 'package:soberly/screens/calendar_screen.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
-import 'package:soberly/screens/statistics_screen.dart';
 import 'package:soberly/controllers/tracking_screen_controller.dart';
 import 'package:soberly/widgets/tracking/add_new_drink.dart';
-import 'package:soberly/widgets/tracking/tracking_bottom_action_bar.dart';
+import 'package:soberly/widgets/tracking/bottom_action_bar.dart';
 import 'package:soberly/widgets/tracking/daily_limit_text.dart';
 import 'package:soberly/widgets/tracking/health_status_card.dart';
 import 'package:soberly/widgets/tracking/tracking_entries_section.dart';
 import 'package:soberly/constants.dart';
 import 'package:soberly/widgets/app_background.dart';
 import 'package:soberly/widgets/app_page_header.dart';
-import 'package:soberly/utils/navigation_helpers.dart';
 
 class TrackingScreen extends StatefulWidget {
   static const String id = 'tracking_screen';
@@ -89,9 +86,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: TrackingBottomActionBar(
-        onCalendarPressed: () => goToScreen(context, CalendarScreen.id),
-        onStatisticsPressed: () => goToScreen(context, StatisticsScreen.id),
+      bottomNavigationBar: BottomActionBar(
         onProfilePressed: () async {
           final updated = await Navigator.pushNamed(
             context,
@@ -104,9 +99,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
           }
         },
         onTrackingPressed: null,
-        selectedTab: TrackingBottomActionBarTab.tracking,
+        selectedTab: BottomActionBarTab.tracking,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: SizedBox.square(
         dimension: 60,
         child: FloatingActionButton(
@@ -119,7 +114,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       body: AppBackground(
         child: SafeArea(
           child: Padding(
-            padding: kEdgeInsetsAll,
+            padding: kEdgeInsetsAll.copyWith(bottom: 0),
             child: FutureBuilder<double>(
               future: _dailyLimitFuture,
               builder: (context, snapshot) {
