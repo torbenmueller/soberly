@@ -48,11 +48,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return map;
   }
 
-  double _computeGrams(List<TrackingEntry> entries) {
+  double _totalAlcoholGrams(List<TrackingEntry> entries) {
     const density = 0.789;
-    return entries.fold(0.0, (sum, e) {
-      if (e.amount <= 0 || e.alcoholPercent <= 0) return sum;
-      return sum + e.amount * (e.alcoholPercent / 100) * density;
+    return entries.fold(0.0, (total, e) {
+      if (e.amount <= 0 || e.alcoholPercent <= 0) return total;
+      return total + e.amount * (e.alcoholPercent / 100) * density;
     });
   }
 
@@ -165,7 +165,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Widget _buildDayHeader(List<TrackingEntry> entries) {
-    final grams = _computeGrams(entries);
+    final grams = _totalAlcoholGrams(entries);
     final d = _selectedDay;
     final label =
         '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
@@ -207,7 +207,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       itemCount: entries.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final entry = entries[index];
         final drinkName = entry.drinkName.isEmpty ? '-' : entry.drinkName;

@@ -89,7 +89,7 @@ class BottomActionBar extends StatelessWidget {
                 tooltip: 'Tracking',
                 onPressed: trackingHandler,
                 icon: Icon(
-                  Icons.local_bar,
+                  Icons.add,
                   color: selectedTab == BottomActionBarTab.tracking
                       ? kPrimaryColor
                       : Colors.white,
@@ -109,7 +109,7 @@ class BottomActionBar extends StatelessWidget {
                 tooltip: 'Statistics',
                 onPressed: statisticsHandler,
                 icon: Icon(
-                  Icons.query_stats,
+                  Icons.show_chart,
                   color: selectedTab == BottomActionBarTab.statistics
                       ? kPrimaryColor
                       : Colors.white,
@@ -119,7 +119,7 @@ class BottomActionBar extends StatelessWidget {
                 tooltip: 'Custom Drinks',
                 onPressed: drinksHandler,
                 icon: Icon(
-                  Icons.liquor,
+                  Icons.local_bar,
                   color: selectedTab == BottomActionBarTab.drinks
                       ? kPrimaryColor
                       : Colors.white,
