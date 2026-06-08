@@ -2,6 +2,18 @@ import 'package:flutter/material.dart';
 
 const kFontSizeLarge = 24.0;
 const kTextOpacity = 0.6;
+const kEthanolDensityGramPerMl = 0.789;
+
+double calculatePureAlcoholGrams({
+  required num amountMl,
+  required double alcoholPercent,
+}) {
+  if (amountMl <= 0 || alcoholPercent <= 0) {
+    return 0.0;
+  }
+
+  return amountMl * (alcoholPercent / 100) * kEthanolDensityGramPerMl;
+}
 
 const kPrimaryColor = Color(0xff72DBF2);
 const kSecondaryTextColor = Color(0xff757575);

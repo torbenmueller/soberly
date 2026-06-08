@@ -16,7 +16,6 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  static const double _ethanolDensityGramPerMl = 0.789;
   late final TrackingScreenController _controller;
   late final Future<double> _dailyLimitFuture;
   int _weekOffset = 0;
@@ -96,10 +95,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         continue;
       }
 
-      final grams =
-          entry.amount *
-          (entry.alcoholPercent / 100) *
-          _ethanolDensityGramPerMl;
+      final grams = calculatePureAlcoholGrams(
+        amountMl: entry.amount,
+        alcoholPercent: entry.alcoholPercent,
+      );
       totalGrams += grams;
       count += 1;
       final dayKey = DateTime(localDate.year, localDate.month, localDate.day);

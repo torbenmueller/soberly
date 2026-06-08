@@ -80,8 +80,10 @@ class TrackingEntriesSection extends StatelessWidget {
                     final drinkName = entry.drinkName.isEmpty
                         ? '-'
                         : entry.drinkName;
-                    final pureAlcohol =
-                        entry.amount * (entry.alcoholPercent / 100) * 0.789;
+                    final pureAlcohol = calculatePureAlcoholGrams(
+                      amountMl: entry.amount,
+                      alcoholPercent: entry.alcoholPercent,
+                    );
                     final subtitle =
                         '${entry.alcoholPercent.toStringAsFixed(1)}%  •  ${entry.amount}ml  • ${pureAlcohol.toStringAsFixed(1)}g'
                         '\n${_formatTimestamp(entry.createdAt)}';

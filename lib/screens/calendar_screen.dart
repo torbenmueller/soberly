@@ -49,10 +49,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   double _totalAlcoholGrams(List<TrackingEntry> entries) {
-    const density = 0.789;
     return entries.fold(0.0, (total, e) {
-      if (e.amount <= 0 || e.alcoholPercent <= 0) return total;
-      return total + e.amount * (e.alcoholPercent / 100) * density;
+      return total +
+          calculatePureAlcoholGrams(
+            amountMl: e.amount,
+            alcoholPercent: e.alcoholPercent,
+          );
     });
   }
 
@@ -211,7 +213,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
       itemBuilder: (context, index) {
         final entry = entries[index];
         final drinkName = entry.drinkName.isEmpty ? '-' : entry.drinkName;
-        final pureAlcohol = entry.amount * (entry.alcoholPercent / 100) * 0.789;
+        final pureAlcohol = calculatePureAlcoholGrams(
+          amountMl: entry.amount,
+          alcoholPercent: entry.alcoholPercent,
+        );
         final subtitle =
             '${entry.alcoholPercent.toStringAsFixed(1)}%  •  ${entry.amount} ml  •  ${pureAlcohol.toStringAsFixed(1)} g'
             '\n${_formatTime(entry.createdAt)}';

@@ -8,10 +8,9 @@ import 'package:soberly/widgets/tracking/delete_tracking_entry_dialog.dart';
 import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
 import 'package:soberly/models/sex_for_calculation.dart';
 import 'package:soberly/services/user_profile_repository.dart';
+import 'package:soberly/constants.dart';
 
 class TrackingScreenController extends ChangeNotifier {
-  static const double _ethanolDensityGramPerMl = 0.789;
-
   TrackingScreenController({
     FirebaseAuth? auth,
     TrackingRepository? trackingRepository,
@@ -135,15 +134,10 @@ class TrackingScreenController extends ChangeNotifier {
         continue;
       }
 
-      final amountMl = entry.amount;
-      final alcoholPercent = entry.alcoholPercent;
-      if (amountMl <= 0 || alcoholPercent <= 0) {
-        continue;
-      }
-
-      final pureAlcoholMl = amountMl * (alcoholPercent / 100);
-      final pureAlcoholGrams = pureAlcoholMl * _ethanolDensityGramPerMl;
-      totalGrams += pureAlcoholGrams;
+      totalGrams += calculatePureAlcoholGrams(
+        amountMl: entry.amount,
+        alcoholPercent: entry.alcoholPercent,
+      );
     }
 
     return totalGrams;
