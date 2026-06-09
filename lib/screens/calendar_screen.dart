@@ -64,12 +64,35 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   }
 
+  bool get _canAddForSelectedDay {
+    return _controller.isAllowedEntryDate(_selectedDay);
+  }
+
+  Future<void> _openAddDrinkSheetForSelectedDay() async {
+    await _controller.showAddDrinkBottomSheet(
+      context: context,
+      onSubmit: () => _controller.submitEntry(context, entryDate: _selectedDay),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: BottomActionBar(
         selectedTab: BottomActionBarTab.calendar,
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _canAddForSelectedDay
+          ? SizedBox.square(
+              dimension: 60,
+              child: FloatingActionButton(
+                onPressed: _openAddDrinkSheetForSelectedDay,
+                backgroundColor: kPrimaryColor,
+                shape: const CircleBorder(),
+                child: const Icon(Icons.add, color: Colors.black, size: 30),
+              ),
+            )
+          : null,
       body: AppBackground(
         child: SafeArea(
           child: StreamBuilder<List<TrackingEntry>>(
@@ -91,6 +114,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
                   _buildCalendar(byDay),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: Text(
+                      'Hint: You can add drinks for today and up to ${_controller.maxBackdateDays} days in the past.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: kTextOpacity),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                   _buildDayHeader(selectedEntries),
                   Expanded(child: _buildDayList(selectedEntries)),
                 ],

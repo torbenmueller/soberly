@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
 import 'package:soberly/screens/profile_setup_screen.dart';
 import 'package:soberly/controllers/tracking_screen_controller.dart';
-import 'package:soberly/widgets/tracking/add_new_drink.dart';
 import 'package:soberly/widgets/tracking/bottom_action_bar.dart';
 import 'package:soberly/widgets/tracking/daily_limit_text.dart';
 import 'package:soberly/widgets/tracking/health_status_card.dart';
@@ -45,41 +44,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
   }
 
   Future<void> _openAddDrinkSheet() async {
-    await _controller.prefillFromMostRecentEntry();
-    if (!mounted) {
-      return;
-    }
-
-    showModalBottomSheet(
+    await _controller.showAddDrinkBottomSheet(
       context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => ListenableBuilder(
-        listenable: _controller,
-        builder: (_, _) => SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: Form(
-              key: _controller.formKey,
-              child: AddNewDrink(
-                drinkNameController: _controller.drinkNameController,
-                alcoholController: _controller.alcoholController,
-                amountController: _controller.amountController,
-                isSubmitting: _controller.isSubmitting,
-                onSubmit: () async {
-                  final saved = await _controller.submitEntry(context);
-                  if (!sheetContext.mounted) return;
-                  if (saved) {
-                    FocusScope.of(sheetContext).unfocus();
-                    Navigator.pop(sheetContext);
-                  }
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
+      onSubmit: () => _controller.submitEntry(context),
     );
   }
 

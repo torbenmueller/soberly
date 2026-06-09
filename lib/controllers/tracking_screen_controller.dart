@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:soberly/models/tracking_entry.dart';
@@ -6,6 +7,7 @@ import 'package:soberly/services/tracking_repository.dart';
 import 'package:soberly/utils/auth_guard.dart';
 import 'package:soberly/widgets/tracking/delete_tracking_entry_dialog.dart';
 import 'package:soberly/widgets/tracking/edit_tracking_entry_dialog.dart';
+import 'package:soberly/widgets/tracking/add_new_drink.dart';
 import 'package:soberly/models/sex_for_calculation.dart';
 import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/constants.dart';
@@ -20,6 +22,9 @@ class TrackingScreenController extends ChangeNotifier {
   final FirebaseAuth _auth;
   final TrackingRepository _trackingRepository;
   final _profileRepository = UserProfileRepository();
+  static const int _maxBackdateDays = 30;
+
+  int get maxBackdateDays => _maxBackdateDays;
 
   final formKey = GlobalKey<FormState>();
   final drinkNameController = TextEditingController();
@@ -99,6 +104,41 @@ class TrackingScreenController extends ChangeNotifier {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
+  DateTime normalizeLocalDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  DateTime oldestAllowedEntryDate({DateTime? now}) {
+    final today = normalizeLocalDate((now ?? DateTime.now()).toLocal());
+    return today.subtract(const Duration(days: _maxBackdateDays));
+  }
+
+  DateTime latestAllowedEntryDate({DateTime? now}) {
+    return normalizeLocalDate((now ?? DateTime.now()).toLocal());
+  }
+
+  bool isAllowedEntryDate(DateTime date, {DateTime? now}) {
+    final normalized = normalizeLocalDate(date.toLocal());
+    final oldest = oldestAllowedEntryDate(now: now);
+    final latest = latestAllowedEntryDate(now: now);
+    return !normalized.isBefore(oldest) && !normalized.isAfter(latest);
+  }
+
+  DateTime _entryDateWithCurrentTime(DateTime entryDate, {DateTime? now}) {
+    final current = (now ?? DateTime.now()).toLocal();
+    final normalizedDate = normalizeLocalDate(entryDate.toLocal());
+    return DateTime(
+      normalizedDate.year,
+      normalizedDate.month,
+      normalizedDate.day,
+      current.hour,
+      current.minute,
+      current.second,
+      current.millisecond,
+      current.microsecond,
+    );
+  }
+
   /// Returns the absolute daily alcohol limit in grams for this user.
   /// Falls back to the conservative (female) limit for null / preferNotToSay.
   Future<double> getDailyLimitGrams() async {
@@ -150,6 +190,7 @@ class TrackingScreenController extends ChangeNotifier {
     required String drinkName,
     required double alcoholPercent,
     required int amount,
+    required DateTime entryDate,
   }) async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -161,6 +202,7 @@ class TrackingScreenController extends ChangeNotifier {
       drinkName: drinkName,
       alcoholPercent: alcoholPercent,
       amount: amount,
+      createdAt: Timestamp.fromDate(_entryDateWithCurrentTime(entryDate)),
     );
 
     try {
@@ -179,9 +221,23 @@ class TrackingScreenController extends ChangeNotifier {
     }
   }
 
-  Future<bool> submitEntry(BuildContext context) async {
+  Future<bool> submitEntry(BuildContext context, {DateTime? entryDate}) async {
     final form = formKey.currentState;
     if (form == null || !form.validate()) return false;
+
+    final selectedEntryDate =
+        entryDate ?? latestAllowedEntryDate(now: DateTime.now());
+
+    if (!isAllowedEntryDate(selectedEntryDate)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'You can add drinks from today and up to $maxBackdateDays days in the past.',
+          ),
+        ),
+      );
+      return false;
+    }
 
     final drinkName = drinkNameController.text.trim();
     final alcoholPercent = double.parse(
@@ -197,6 +253,7 @@ class TrackingScreenController extends ChangeNotifier {
       drinkName: drinkName,
       alcoholPercent: alcoholPercent,
       amount: amount,
+      entryDate: selectedEntryDate,
     );
 
     _isSubmitting = false;
@@ -209,6 +266,48 @@ class TrackingScreenController extends ChangeNotifier {
     }
 
     return saved;
+  }
+
+  // ── Show add-drink bottom sheet ──────────────────────────────────────────
+
+  Future<void> showAddDrinkBottomSheet({
+    required BuildContext context,
+    required Future<bool> Function() onSubmit,
+  }) async {
+    await prefillFromMostRecentEntry();
+    if (!context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => ListenableBuilder(
+        listenable: this,
+        builder: (_, _) => SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: Form(
+              key: formKey,
+              child: AddNewDrink(
+                drinkNameController: drinkNameController,
+                alcoholController: alcoholController,
+                amountController: amountController,
+                isSubmitting: isSubmitting,
+                onSubmit: () async {
+                  final saved = await onSubmit();
+                  if (!sheetContext.mounted) return;
+                  if (saved) {
+                    FocusScope.of(sheetContext).unfocus();
+                    Navigator.pop(sheetContext);
+                  }
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // ── Delete entry ─────────────────────────────────────────────────────────

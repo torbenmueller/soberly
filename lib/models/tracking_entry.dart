@@ -36,7 +36,7 @@ class TrackingEntry {
       'drinkName': drinkName,
       'alcoholPercent': alcoholPercent,
       'amount': amount,
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
     };
   }
 

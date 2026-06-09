@@ -113,7 +113,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       return dailyTotals[DateTime(day.year, day.month, day.day)] ?? 0.0;
     });
 
-    final soberDays = daysInPeriod - activeDays.length;
+    final now = DateTime.now();
+    final normalizedToday = DateTime(now.year, now.month, now.day);
+    final soberWindowEnd = normalizedEnd.isBefore(normalizedToday)
+        ? normalizedEnd
+        : normalizedToday;
+    final soberDays = soberWindowEnd.isBefore(normalizedStart)
+        ? 0
+        : (soberWindowEnd.difference(normalizedStart).inDays + 1) -
+              activeDays.where((day) => !day.isAfter(soberWindowEnd)).length;
 
     return _PeriodStats(
       totalGrams: totalGrams,
