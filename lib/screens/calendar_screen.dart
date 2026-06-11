@@ -110,20 +110,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     padding: kEdgeInsetsAll.copyWith(bottom: 0),
                     child: const AppPageHeader(
                       title: 'Calendar',
-                      subtitle: 'Review your drinking history by day',
+                      subtitle: 'Add drinks from up to 30 days ago',
+                      bottomSpacing: 0,
                     ),
                   ),
                   _buildCalendar(byDay),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-                    child: Text(
-                      'Hint: You can add drinks for today and up to ${_controller.maxBackdateDays} days in the past.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: kTextOpacity),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
                   _buildDayHeader(selectedEntries),
                   Expanded(child: _buildDayList(selectedEntries)),
                 ],
@@ -229,12 +220,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Widget _buildDayList(List<TrackingEntry> entries) {
     if (entries.isEmpty) {
-      return Center(
-        child: Text(
-          'No entries for this day.',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: kTextOpacity),
-            fontSize: 16,
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 72),
+        child: Center(
+          child: Text(
+            'No entries for this day.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: kTextOpacity),
+              fontSize: 16,
+            ),
           ),
         ),
       );

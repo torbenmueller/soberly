@@ -115,9 +115,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     final now = DateTime.now();
     final normalizedToday = DateTime(now.year, now.month, now.day);
-    final soberWindowEnd = normalizedEnd.isBefore(normalizedToday)
+    // Count only fully past days for ongoing periods (exclude today).
+    final lastPastDay = normalizedToday.subtract(const Duration(days: 1));
+    final soberWindowEnd = normalizedEnd.isBefore(lastPastDay)
         ? normalizedEnd
-        : normalizedToday;
+        : lastPastDay;
     final soberDays = soberWindowEnd.isBefore(normalizedStart)
         ? 0
         : (soberWindowEnd.difference(normalizedStart).inDays + 1) -
@@ -193,7 +195,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         title: 'Statistics',
                         subtitle: 'See trends and insights over time',
                       ),
-                      const SizedBox(height: 8),
                       _StatsCard(
                         title: _periodTitle('Week', _weekOffset),
                         dateRange:
@@ -375,8 +376,6 @@ class _DailyBarsChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (values.isEmpty) return const SizedBox.shrink();
-
     final maxValue = values.reduce((a, b) => a > b ? a : b);
     // Use the higher of max bar or limit so the line always fits in the chart.
     final chartMax = (dailyLimit > maxValue && dailyLimit > 0)
@@ -422,10 +421,7 @@ class _DailyBarsChart extends StatelessWidget {
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: ((dailyLimit / chartMax) * (chartHeight - 2)).clamp(
-                    0,
-                    chartHeight - 2,
-                  ),
+                  bottom: (dailyLimit / chartMax) * (chartHeight - 2),
                   child: CustomPaint(
                     size: const Size(double.infinity, 1),
                     painter: _DashedLinePainter(),

@@ -60,11 +60,16 @@ class TrackingEntriesSection extends StatelessWidget {
 
               final entries = snapshot.data!;
               if (entries.isEmpty) {
-                return Expanded(
+                return Padding(
+                  // Keep the empty-state text visually centered between header and FAB.
+                  padding: const EdgeInsets.only(bottom: 72),
                   child: Center(
                     child: Text(
                       'No entries yet. Tap + to add a drink.',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: kTextOpacity),
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 );

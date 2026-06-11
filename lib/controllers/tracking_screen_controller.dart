@@ -228,17 +228,6 @@ class TrackingScreenController extends ChangeNotifier {
     final selectedEntryDate =
         entryDate ?? latestAllowedEntryDate(now: DateTime.now());
 
-    if (!isAllowedEntryDate(selectedEntryDate)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'You can add drinks from today and up to $maxBackdateDays days in the past.',
-          ),
-        ),
-      );
-      return false;
-    }
-
     final drinkName = drinkNameController.text.trim();
     final alcoholPercent = double.parse(
       alcoholController.text.trim().replaceAll(',', '.'),
