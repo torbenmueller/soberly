@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:soberly/components/app_button.dart';
 import 'package:soberly/constants.dart';
+import 'package:soberly/models/custom_drink.dart';
 
 class AddNewDrink extends StatelessWidget {
   const AddNewDrink({
@@ -9,6 +10,8 @@ class AddNewDrink extends StatelessWidget {
     required this.alcoholController,
     required this.amountController,
     required this.isSubmitting,
+    required this.customDrinks,
+    required this.onSelectCustomDrink,
     required this.onSubmit,
   });
 
@@ -16,6 +19,8 @@ class AddNewDrink extends StatelessWidget {
   final TextEditingController alcoholController;
   final TextEditingController amountController;
   final bool isSubmitting;
+  final List<CustomDrink> customDrinks;
+  final ValueChanged<CustomDrink> onSelectCustomDrink;
   final Future<void> Function() onSubmit;
 
   @override
@@ -38,6 +43,42 @@ class AddNewDrink extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
+            if (customDrinks.isNotEmpty) ...[
+              Text(
+                'Quick add from custom drinks',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: kTextOpacity),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final drink in customDrinks)
+                    ActionChip(
+                      avatar: CircleAvatar(
+                        backgroundColor: Color(drink.colorValue),
+                        child: Icon(
+                          customDrinkIconOptionFromKey(drink.iconKey).icon,
+                          size: 16,
+                          color:
+                              ThemeData.estimateBrightnessForColor(
+                                    Color(drink.colorValue),
+                                  ) ==
+                                  Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                      label: Text(drink.name),
+                      onPressed: () => onSelectCustomDrink(drink),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
             TextFormField(
               controller: drinkNameController,
               textCapitalization: TextCapitalization.sentences,

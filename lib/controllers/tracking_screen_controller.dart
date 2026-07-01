@@ -11,6 +11,8 @@ import 'package:soberly/widgets/tracking/add_new_drink.dart';
 import 'package:soberly/models/sex_for_calculation.dart';
 import 'package:soberly/services/user_profile_repository.dart';
 import 'package:soberly/constants.dart';
+import 'package:soberly/models/custom_drink.dart';
+import 'package:soberly/services/custom_drinks_repository.dart';
 
 class TrackingScreenController extends ChangeNotifier {
   TrackingScreenController({
@@ -22,6 +24,7 @@ class TrackingScreenController extends ChangeNotifier {
   final FirebaseAuth _auth;
   final TrackingRepository _trackingRepository;
   final _profileRepository = UserProfileRepository();
+  final _customDrinksRepository = CustomDrinksRepository();
   static const int _maxBackdateDays = 30;
 
   int get maxBackdateDays => _maxBackdateDays;
@@ -58,6 +61,12 @@ class TrackingScreenController extends ChangeNotifier {
     final user = _auth.currentUser;
     if (user == null) return const Stream.empty();
     return _trackingRepository.streamEntries(uid: user.uid);
+  }
+
+  Stream<List<CustomDrink>> get customDrinksStream {
+    final user = _auth.currentUser;
+    if (user == null) return const Stream.empty();
+    return _customDrinksRepository.streamCustomDrinks(uid: user.uid);
   }
 
   /// Stream of tracking entries filtered to today's date only.
@@ -257,6 +266,13 @@ class TrackingScreenController extends ChangeNotifier {
     return saved;
   }
 
+  void applyCustomDrinkPreset(CustomDrink drink) {
+    drinkNameController.text = drink.name;
+    alcoholController.text = _formatAlcoholPercent(drink.alcoholPercent);
+    amountController.text = drink.amountMl.toString();
+    notifyListeners();
+  }
+
   // ── Show add-drink bottom sheet ──────────────────────────────────────────
 
   Future<void> showAddDrinkBottomSheet({
@@ -271,26 +287,32 @@ class TrackingScreenController extends ChangeNotifier {
       isScrollControlled: true,
       builder: (sheetContext) => ListenableBuilder(
         listenable: this,
-        builder: (_, _) => SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: Form(
-              key: formKey,
-              child: AddNewDrink(
-                drinkNameController: drinkNameController,
-                alcoholController: alcoholController,
-                amountController: amountController,
-                isSubmitting: isSubmitting,
-                onSubmit: () async {
-                  final saved = await onSubmit();
-                  if (!sheetContext.mounted) return;
-                  if (saved) {
-                    FocusScope.of(sheetContext).unfocus();
-                    Navigator.pop(sheetContext);
-                  }
-                },
+        builder: (_, _) => StreamBuilder<List<CustomDrink>>(
+          stream: customDrinksStream,
+          builder: (_, customDrinksSnapshot) => SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+              ),
+              child: Form(
+                key: formKey,
+                child: AddNewDrink(
+                  drinkNameController: drinkNameController,
+                  alcoholController: alcoholController,
+                  amountController: amountController,
+                  isSubmitting: isSubmitting,
+                  customDrinks:
+                      customDrinksSnapshot.data ?? const <CustomDrink>[],
+                  onSelectCustomDrink: applyCustomDrinkPreset,
+                  onSubmit: () async {
+                    final saved = await onSubmit();
+                    if (!sheetContext.mounted) return;
+                    if (saved) {
+                      FocusScope.of(sheetContext).unfocus();
+                      Navigator.pop(sheetContext);
+                    }
+                  },
+                ),
               ),
             ),
           ),
