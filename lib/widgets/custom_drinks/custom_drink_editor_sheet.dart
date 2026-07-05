@@ -126,8 +126,6 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
               children: [
                 Row(
                   children: [
-                    Icon(selectedIcon.icon, color: selectedColor),
-                    const SizedBox(width: 8),
                     Text(
                       widget.initialDrink == null
                           ? 'Add Custom Drink'
@@ -166,7 +164,7 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
                                   ? 'Drink preview'
                                   : _nameController.text.trim(),
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -175,7 +173,7 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
                             Text(
                               '${_amountController.text.trim().isEmpty ? '-' : _amountController.text.trim()} ml  •  ${_alcoholController.text.trim().isEmpty ? '-' : _alcoholController.text.trim()}%',
                               style: TextStyle(
-                                color: Colors.white.withValues(
+                                color: Colors.black.withValues(
                                   alpha: kTextOpacity,
                                 ),
                               ),
@@ -250,7 +248,7 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
                 Text(
                   'Choose an icon',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: kTextOpacity),
+                    color: Colors.black.withValues(alpha: kTextOpacity),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -261,6 +259,7 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
                   children: [
                     for (final option in customDrinkIconOptions)
                       ChoiceChip(
+                        backgroundColor: const Color(0xFFE0E0E0),
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -279,7 +278,7 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
                 Text(
                   'Choose a color',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: kTextOpacity),
+                    color: Colors.black.withValues(alpha: kTextOpacity),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -290,6 +289,7 @@ class _CustomDrinkEditorSheetState extends State<CustomDrinkEditorSheet> {
                   children: [
                     for (final option in customDrinkColorOptions)
                       ChoiceChip(
+                        backgroundColor: const Color(0xFFE0E0E0),
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

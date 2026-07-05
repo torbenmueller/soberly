@@ -34,8 +34,6 @@ class AddNewDrink extends StatelessWidget {
           children: [
             const Row(
               children: [
-                Icon(Icons.local_bar, size: 22),
-                SizedBox(width: 8),
                 Text(
                   'Add New Drink',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -47,7 +45,7 @@ class AddNewDrink extends StatelessWidget {
               Text(
                 'Quick add from custom drinks',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: kTextOpacity),
+                  color: Colors.black.withValues(alpha: kTextOpacity),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -57,24 +55,26 @@ class AddNewDrink extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   for (final drink in customDrinks)
-                    ActionChip(
-                      avatar: CircleAvatar(
-                        backgroundColor: Color(drink.colorValue),
-                        child: Icon(
-                          customDrinkIconOptionFromKey(drink.iconKey).icon,
-                          size: 16,
-                          color:
-                              ThemeData.estimateBrightnessForColor(
-                                    Color(drink.colorValue),
-                                  ) ==
-                                  Brightness.dark
-                              ? Colors.white
-                              : Colors.black,
+                    (() {
+                      final drinkColor = Color(drink.colorValue);
+                      final chipBackground = Color.alphaBlend(
+                        drinkColor.withValues(alpha: 0.12),
+                        Colors.white,
+                      );
+                      return ActionChip(
+                        color: WidgetStatePropertyAll<Color>(chipBackground),
+                        side: BorderSide(
+                          color: drinkColor.withValues(alpha: 0.4),
                         ),
-                      ),
-                      label: Text(drink.name),
-                      onPressed: () => onSelectCustomDrink(drink),
-                    ),
+                        avatar: Icon(
+                          customDrinkIconOptionFromKey(drink.iconKey).icon,
+                          size: 20,
+                          color: drinkColor,
+                        ),
+                        label: Text(drink.name),
+                        onPressed: () => onSelectCustomDrink(drink),
+                      );
+                    })(),
                 ],
               ),
               const SizedBox(height: 12),

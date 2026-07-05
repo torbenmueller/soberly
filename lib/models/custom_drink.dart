@@ -115,8 +115,12 @@ class CustomDrinkColorOption {
 const customDrinkIconOptions = <CustomDrinkIconOption>[
   CustomDrinkIconOption(key: 'beer', label: 'Beer', icon: Icons.sports_bar),
   CustomDrinkIconOption(key: 'wine', label: 'Wine', icon: Icons.wine_bar),
-  CustomDrinkIconOption(key: 'shots', label: 'Shots', icon: Icons.local_bar),
-  CustomDrinkIconOption(key: 'cocktail', label: 'Cocktail', icon: Icons.liquor),
+  CustomDrinkIconOption(key: 'shots', label: 'Shots', icon: Icons.liquor),
+  CustomDrinkIconOption(
+    key: 'cocktail',
+    label: 'Cocktail',
+    icon: Icons.local_bar,
+  ),
   CustomDrinkIconOption(key: 'drink', label: 'Drink', icon: Icons.local_drink),
 ];
 
@@ -138,7 +142,7 @@ const customDrinkColorOptions = <CustomDrinkColorOption>[
     color: Color(0xffF59E0B),
   ),
   CustomDrinkColorOption(key: 'pink', label: 'Pink', color: Color(0xffF472B6)),
-  CustomDrinkColorOption(key: 'red', label: 'Red', color: Color(0xffFB7185)),
+  CustomDrinkColorOption(key: 'red', label: 'Red', color: Color(0xffD32F2F)),
 ];
 
 CustomDrinkIconOption customDrinkIconOptionFromKey(String key) {
